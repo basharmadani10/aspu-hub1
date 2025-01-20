@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use App\Mail\RegisterMail; // Import the Mailable class
+use Illuminate\Support\Facades\Mail; // Import the Mail facade
 
 class RegistrationController extends Controller
 {
@@ -17,8 +20,8 @@ class RegistrationController extends Controller
      */
     public function register(Request $request)
     {
-
-        $validatedData = $request->validate([
+        // Validate the request data
+        $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -29,28 +32,47 @@ class RegistrationController extends Controller
             'gender' => 'nullable|string|in:male,female,other',
             'birth_date' => 'nullable|date',
             'bio' => 'nullable|string',
-            'role' => 'required|string|in:admin,student,superadmin',
+            'role' => 'required|string|in:student,admin,superadmin',
         ]);
 
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
+        // Map role to roleID
         $roleMapping = [
-            'superadmin' => 1,
+            'student' => 1,
             'admin' => 2,
-            'student' => 3,
+            'superadmin' => 3,
         ];
 
-        $validatedData['roleID'] = $roleMapping[$validatedData['role']];
-        unset($validatedData['role']);
+        // Generate a unique email verification token
+        $emailVerificationToken = \Illuminate\Support\Str::random(60);
 
+        // Create the user
+        $user = User::create([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'phone_number' => $request->phone_number,
+            'country' => $request->country,
+            'current_location' => $request->current_location,
+            'gender' => $request->gender,
+            'birth_date' => $request->birth_date,
+            'bio' => $request->bio,
+            'roleID' => $roleMapping[$request->role], // Assign roleID based on role
+            'email_verification_token' => $emailVerificationToken, // Set the token
+        ]);
 
-        $validatedData['password'] = Hash::make($validatedData['password']);
+        // Log the user creation for debugging
+        \Log::info('User created:', ['user' => $user, 'token' => $emailVerificationToken]);
 
-
-        $user = User::create($validatedData);
-
+        // Send the verification email
+        Mail::to($user->email)->send(new RegisterMail($user, $emailVerificationToken));
 
         return response()->json([
-            'message' => 'User registered successfully',
+            'message' => 'User registered successfully. Please check your email to verify your account.',
             'user' => $user,
         ], 201);
     }

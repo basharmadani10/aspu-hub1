@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Hash;
 
 class SuperAdminAuthController extends Controller
 {
-        //when register give role to the user  
+        //when register give role to the user
 
     public function login(Request $request)
     {
@@ -39,5 +39,23 @@ class SuperAdminAuthController extends Controller
         $request->user()->tokens()->delete();
 
         return response()->json(['message' => 'Logged out successfully']);
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 }
