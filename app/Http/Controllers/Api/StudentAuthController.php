@@ -11,11 +11,11 @@ use Illuminate\Support\Facades\Hash;
 
 class StudentAuthController extends Controller
 {
-    //when register give role to the user  
-    
+    //when register give role to the user
+
     public function login(Request $request)
     {
-        
+
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
@@ -40,4 +40,16 @@ class StudentAuthController extends Controller
 
         return response()->json(['message' => 'Logged out successfully']);
     }
+
+    public function resetPassword(Request $request)
+    {
+        $request->user()->tokens()->delete();
+
+        return response()->json(['message' => 'Logged out successfully']);
+
+    }
+
+
+
+
 }
