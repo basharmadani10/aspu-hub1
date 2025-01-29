@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\VerificationController;
 use App\Http\Controllers\Api\RegistrationController;
+use App\Http\Controllers\Api\PasswordResetCodeController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -29,14 +30,18 @@ Route::get('/user', function (Request $request) {
 
 
 Route::prefix('student')->group(function () {
-    Route::post('/login', [StudentAuthController::class, 'login']);
+    Route::post('/login', [StudentAuthController::class, 'login'])->name('login');
+
+
     Route::middleware('auth:student')->group(function () {
         Route::post('/logout', [StudentAuthController::class, 'logout']);
         Route::get('/dashboard', [StudentAuthController::class, 'dashboard']);
 
 
-
-
+Route::post('/password/send-code', [PasswordResetCodeController::class, 'sendResetCode'])
+    ->name('password.send.code');
+Route::post('/password/reset', [PasswordResetCodeController::class, 'verifyCodeAndResetPassword'])
+    ->name('password.reset.submit');
 
     });
 });
