@@ -24,7 +24,7 @@ class CreateUsersTable extends Migration
             $table->text('bio')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('email_verification_token')->nullable(); // Removed the `after` method
+            $table->string('email_verification_token')->nullable();
             $table->string('password');
             $table->string('phone_number')->nullable();
             $table->string('country')->nullable();
