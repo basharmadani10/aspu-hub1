@@ -75,6 +75,9 @@ class User extends Authenticatable
     {
         return $this->morphMany(Post::class, 'location');
     }
-
+    
+    public function Subscribe_Communities() {
+    return $this->hasMany(Subscribe_Communities::class, 'user_id');   
+    }
 }
 

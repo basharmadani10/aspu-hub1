@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\VerificationController;
 use App\Http\Controllers\Api\RegistrationController;
 use App\Http\Controllers\Api\PasswordResetCodeController;
+use App\Http\Controllers\Api\PostController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -71,3 +72,5 @@ Route::prefix('super-admin')->group(function () {
         Route::post('/email/resend',[[RegistrationController::class,'resend']]);
      });
 });
+//////////////////////home page api////////////////////////////
+Route::get('post/get',[PostController::class,'GetAllPost'] );
