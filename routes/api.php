@@ -24,7 +24,7 @@ use App\Http\Controllers\Api\PasswordResetCodeController;
 
 
 Route::post('/register', [RegistrationController::class, 'register']);
-Route::get('/verify-email', [VerificationController::class, 'verify']);
+Route::post('/verify-email', [RegistrationController::class, 'verifyEmail']);
 
 
 Route::get('/user', function (Request $request) {

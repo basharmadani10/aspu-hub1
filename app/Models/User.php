@@ -26,7 +26,7 @@ class User extends Authenticatable
         'birth_date',
         'bio',
         'roleID',
-        'email_verification_token', ];
+        'email_verification_code', ];
 
     protected $hidden = [
         'password',

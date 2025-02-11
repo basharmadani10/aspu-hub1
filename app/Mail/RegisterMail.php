@@ -14,19 +14,19 @@ class RegisterMail extends Mailable
     use Queueable, SerializesModels;
 
     public $user; // User data
-    public $token; // Token to include in the email
+    public $code; // 4-digit code to include in the email
 
     /**
      * Create a new message instance.
      *
      * @param  mixed  $user
-     * @param  string  $token
+     * @param  string  $code
      * @return void
      */
-    public function __construct($user, $token)
+    public function __construct($user, $code)
     {
         $this->user = $user;
-        $this->token = $token;
+        $this->code = $code;
     }
 
     /**
@@ -48,12 +48,14 @@ class RegisterMail extends Mailable
      */
     public function content()
     {
-        return new Content(
-            view: 'emails.register', // Blade view for the email
-            with: [
-                'user' => $this->user,
-                'token' => $this->token,
-            ],
+
+        return new Content(  // إرسال البريد الإلكتروني كنص عادي (plain text) مباشرة
+            text: 'Hello ' . $this->user->first_name . ",\n\n"
+                . "Thank you for registering. Please use the following code to verify your email address:\n\n"
+                . "Verification Code: " . $this->code . "\n\n"
+                . "If you did not create an account, no further action is required.\n\n"
+                . "Regards,\n"
+                . config('app.name')
         );
     }
 
