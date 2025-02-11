@@ -15,6 +15,7 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+
             $table->string('first_name');
             $table->string('last_name');
             $table->date('birth_date');
@@ -23,6 +24,7 @@ class CreateUsersTable extends Migration
             $table->text('bio')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('email_verification_token')->nullable();
             $table->string('password');
             $table->string('phone_number')->nullable();
             $table->string('country')->nullable();
@@ -31,7 +33,7 @@ class CreateUsersTable extends Migration
             $table->boolean('is_blocked')->default(false);
             $table->timestamps();
 
-           # $table->foreign('roleID')->references('roleID')->on('roles')->onDelete('cascade');
+            // Uncomment this line if you have a roles table and want to set up a foreign key
             // $table->foreign('roleID')->references('roleID')->on('roles')->onDelete('cascade');
         });
     }
