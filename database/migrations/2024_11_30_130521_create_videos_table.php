@@ -13,8 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('super_admins', function (Blueprint $table) {
+
+        Schema::create('videos', function (Blueprint $table) {
             $table->id();
+            $table->string('video');
+            $table->foreignId('post_id')->constrained('posts')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('super_admins');
+        Schema::dropIfExists('videos');
     }
 };
