@@ -18,6 +18,30 @@ return new class extends Migration
             $table->string('photo');
             $table->foreignId('post_id')->constrained('posts')->onDelete('cascade');
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+
+
+
             $table->timestamps();
         });
 

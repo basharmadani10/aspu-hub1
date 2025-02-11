@@ -23,7 +23,7 @@ use App\Http\Controllers\Api\PasswordResetCodeController;
 
 
 Route::post('/register', [RegistrationController::class, 'register']);
-Route::get('/verify-email', [VerificationController::class, 'verify']);
+Route::post('/verify-email', [RegistrationController::class, 'verifyEmail']);
 
 
 Route::get('/user', function (Request $request) {
@@ -69,7 +69,6 @@ Route::prefix('super-admin')->group(function () {
     Route::post('/login', [SuperAdminAuthController::class, 'login']);
     Route::middleware('auth:superAdmins')->group(function () {
         Route::post('/logout', [SuperAdminAuthController::class, 'logout']);
-
         Route::post('/email/resend',[[RegistrationController::class,'resend']]);
      });
 });
