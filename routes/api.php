@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\VerificationController;
 use App\Http\Controllers\Api\RegistrationController;
 use App\Http\Controllers\Api\PasswordResetCodeController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -23,6 +24,8 @@ use App\Http\Controllers\Api\PasswordResetCodeController;
 
 
 Route::post('/register', [RegistrationController::class, 'register']);
+Route::post('/verify-email', [RegistrationController::class, 'verifyEmail']);
+
 
 Route::get('/user', function (Request $request) {
     return "request->user()";
