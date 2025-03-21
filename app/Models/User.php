@@ -71,7 +71,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserSubject::class);
     }
-    public function posts()
+  public function posts()
     {
         return $this->morphMany(Post::class, 'location');
     }
