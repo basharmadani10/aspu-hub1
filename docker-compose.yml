@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: laravel_app
+    image: mo1074/laravel-aspu:v1
+    volumes:
+      - /home/bm10/ASPU_HUB/BAckend/ASPU_HUB:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - db
+    ports:
+      - "8000:80"
+      - "2525:2525"
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: aspu-hub
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      MAIL_FROM_ADDRESS: xxxxxxxxxxx
+      MAIL_FROM_NAME: ASPU-HUB
+
+      # Looking to send emails in production? Check out our Email API/SMTP product!
+      MAIL_MAILER: smtp
+      MAIL_HOST: sandbox.smtp.mailtrap.io
+      MAIL_PORT: 2525
+      MAIL_USERNAME: xxxxxxxxx
+      MAIL_PASSWORD: xxxxxxxxxxxxx
+    networks:
+      - laravel_network
+
+  front:
+    container_name: react_front
+    image: mo1074/react-aspu:v6
+    volumes:
+      - react:/app
+    ports:
+      - "5173:5173"
+    networks:
+      - laravel_network
+    depends_on:
+      - app
+    tty: true
+
+  db:
+    container_name: mysql_db
+    image: mysql:8.0
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: aspu-hub
+    ports:
+      - "3306:3306"
+    networks:
+      - laravel_network
+
+volumes:
+  mysql_data:
+    driver: local
+  react:
+    driver: local
+
+networks:
+  laravel_network:
+    driver: bridge
