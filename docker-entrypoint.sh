@@ -20,6 +20,7 @@ php artisan key:generate
 
 # Run database migrations
 php artisan migrate --force || true  # Allow migration errors without stopping container
+php artisan migrate --force || true  
 
 # Start Apache
 exec apache2-foreground
