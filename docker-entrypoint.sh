@@ -19,6 +19,7 @@ cd /var/www/html
 php artisan key:generate
 
 # Run database migrations
+php artisan migrate --force || true  # Allow migration errors without stopping container
 php artisan migrate --force || true  
 
 # Start Apache
