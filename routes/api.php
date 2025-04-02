@@ -1,8 +1,9 @@
 <?php
-
+use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\StudentAuthController;
 use App\Http\Controllers\Api\SuperAdminAuthController;
+use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\VerificationController;
@@ -38,13 +39,17 @@ Route::prefix('student')->group(function () {
     Route::middleware('auth:student')->group(function () {
         Route::post('/logout', [StudentAuthController::class, 'logout']);
         Route::get('/dashboard', [StudentAuthController::class, 'dashboard']);
-
-
+Route::get('post/get',[PostController::class,'GetAllPost'] );
+Route::post('post/Add',[PostController::class,'Addpost'] );
 Route::post('/password/send-code', [PasswordResetCodeController::class, 'sendResetCode'])
     ->name('password.send.code');
 Route::post('/password/reset', [PasswordResetCodeController::class, 'verifyCodeAndResetPassword'])
     ->name('password.reset.submit');
-
+    Route::post('AddComment', [ProfileController::class,'AddComment']);
+    Route::get('Getuserinfo', [ProfileController::class,'getProfile']);
+    Route::get('Getuserpost', [ProfileController::class,'getUserPosts']);
+    Route::get('Getusercomment', [ProfileController::class,'getUserComments']);
+    Route::put('VotePost', [ProfileController::class,'votePost']);
     });
 });
 
@@ -73,4 +78,3 @@ Route::prefix('super-admin')->group(function () {
      });
 });
 //////////////////////home page api////////////////////////////
-Route::get('post/get',[PostController::class,'GetAllPost'] );

@@ -8,41 +8,56 @@ use App\Models\Post;
 use App\Models\User;
 use App\Models\Photo;
 use App\Models\Video;
-
+use App\Models\Comment;
+use Illuminate\Support\Facades\Hash;
 class PostController extends Controller
-{
-    public function AddNewPost(Request $data){
-        $rules = [
-            'title'         => 'required|string|max:255',
-            'content'       => 'required|string',
-            'typePost'      => 'required|in:Ask,Advise,Story',
-            
-           
-        ];
+{public function Addpost(Request $request)
+    {
+        // التحقق من البيانات
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'typePost' => 'required|string',
+            'community_id' => 'required|exists:communities,id',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
     
-        $validator = Validator::make($request->all(), $rules);
+        // إنشاء البوست
+        $post = Post::create([
+            'title' => $request->title,
+            'content' => $request->content,
+            'typePost' => $request->typePost,
+            'community_id' => $request->community_id,
+            'user_id' => auth()->id(), // أو $request->user_id حسب السياق
+            'positiveVotes' => 0,
+            'negativeVotes' => 0,
+        ]);
     
-        if ($validator->fails()) {
-            return response()->json(['error'=>$validator], 400);
+        // رفع الصور وربطها بالبوست
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                $path = $image->storeAs('posts', $imageName, 'public');
+    
+                Photo::create([
+                    'post_id' => $post->id,
+                    'photo' => $path,
+                ]);
+            }
         }
-        $usertoken = $data->header('token');
-        $user=User::where('email_verification_token',$usertoken)->first();
-        $user_id=$user->id;
-        $community_id=$data->community_id;
-        $post= new Post();
-        $post->title= $data->title;       
-        $post->content=$data->content;
-        $post->typePost=$data->typePost;
-        $post->community_id=$community_id;
-        $post->user_id=$user_id;
-        $post->save();
+    
+        return response()->json([
+            'message' => 'تم إنشاء البوست بنجاح مع الصور',
+            'post' => $post->load('photos')
+        ], 201);
     }
+   
     public function GetAllPost(Request $data){
-    $usertoken = $data->header('token');
-    $user=User::with('Subscribe_Communities')->where('email_verification_token',$usertoken)->first();
+    $user=$data->user();
+    $user=User::with('Subscribe_Communities')->where('id',$user->id)->first();
     $Subscribe_Communities=$user->Subscribe_Communities;
     $community_id=$Subscribe_Communities->pluck('community_id');    
-    $posts= Post::whereIn('location_id', $community_id)->where('location_type','Communitie')->get();
+    $posts= Post::whereIn('community_id', $community_id)->get();
     return response()->json($posts, 200);
     }
     public function AddImage(Request $data){
@@ -64,7 +79,5 @@ class PostController extends Controller
         
         return response()->json(['image_url' => $imagePath]);
     }
-    public function AddComment(Request $data){
-    
-    }
+   
 }
