@@ -39,16 +39,16 @@ class RegistrationController extends Controller
             'email_verification_code' => $verificationCode,
         ]);
 
-        // Send verification email
-        // Mail::raw("Your email verification code is: $verificationCode", function ($message) use ($request) {
-        //     $message->to($request->email)
-        //             ->subject('Email Verification Code');
-        // });
+      
+        Mail::raw("Your email verification code is: $verificationCode", function ($message) use ($request) {
+            $message->to($request->email)
+                    ->subject('Email Verification Code');
+        });
 
-        // return response()->json([
-        //     'message' => 'User registered successfully. Check your email for the verification code.',
+        return response()->json([
+            'message' => 'User registered successfully. Check your email for the verification code.',
 
-        // ], 201);
+        ], 201);
         return response()->json(['messag'=>"user created succefully",$user], 200);
     }
 
