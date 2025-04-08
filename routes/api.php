@@ -34,17 +34,17 @@ Route::get('/user', function (Request $request) {
 
 Route::prefix('student')->group(function () {
     Route::post('/login', [StudentAuthController::class, 'login'])->name('login');
-
-
+   
     Route::middleware('auth:student')->group(function () {
         Route::post('/logout', [StudentAuthController::class, 'logout']);
         Route::get('/dashboard', [StudentAuthController::class, 'dashboard']);
-Route::get('post/get',[PostController::class,'GetAllPost'] );
-Route::post('post/Add',[PostController::class,'Addpost'] );
+
 Route::post('/password/send-code', [PasswordResetCodeController::class, 'sendResetCode'])
     ->name('password.send.code');
 Route::post('/password/reset', [PasswordResetCodeController::class, 'verifyCodeAndResetPassword'])
     ->name('password.reset.submit');
+Route::get('post/get',[PostController::class,'GetAllPost'] );
+Route::post('post/Add',[PostController::class,'Addpost'] );
     Route::post('AddComment', [ProfileController::class,'AddComment']);
     Route::get('Getuserinfo', [ProfileController::class,'getProfile']);
     Route::get('Getuserpost', [ProfileController::class,'getUserPosts']);
