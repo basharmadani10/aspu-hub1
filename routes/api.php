@@ -33,19 +33,19 @@ Route::get('/user', function (Request $request) {
 
 
 Route::prefix('student')->group(function () {
+    // Public routes (no auth required)
     Route::post('/login', [StudentAuthController::class, 'login'])->name('login');
 
+    // Password reset routes (should be public)
+    Route::post('/password/send-code', [PasswordResetCodeController::class, 'sendResetCode'])
+        ->name('password.send.code');
+    Route::post('/password/reset', [PasswordResetCodeController::class, 'verifyCodeAndResetPassword'])
+        ->name('password.reset.submit');
 
+    // Authenticated routes
     Route::middleware('auth:student')->group(function () {
         Route::post('/logout', [StudentAuthController::class, 'logout']);
         Route::get('/dashboard', [StudentAuthController::class, 'dashboard']);
-
-
-Route::post('/password/send-code', [PasswordResetCodeController::class, 'sendResetCode'])
-    ->name('password.send.code');
-Route::post('/password/reset', [PasswordResetCodeController::class, 'verifyCodeAndResetPassword'])
-    ->name('password.reset.submit');
-
     });
 });
 

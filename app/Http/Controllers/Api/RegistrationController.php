@@ -20,6 +20,7 @@ class RegistrationController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|string|in:student,admin,superadmin',
+            
         ]);
 
         if ($validator->fails()) {

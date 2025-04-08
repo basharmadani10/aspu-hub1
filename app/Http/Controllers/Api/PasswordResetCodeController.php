@@ -67,7 +67,7 @@ class PasswordResetCodeController extends Controller
         $user = User::where('email', $request->email)->first();
         $user->password = bcrypt($request->password);
         $user->save();
-
+    
         DB::table('password_reset_codes')->where('email', $request->email)->delete();
 
         return response()->json(['message' => 'Password reset successfully.']);
