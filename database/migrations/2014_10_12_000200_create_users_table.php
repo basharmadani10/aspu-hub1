@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Schema;
 class CreateUsersTable extends Migration
 {
     /**
-     * BM ربفغره
      * Run the migrations.
      *
      * @return void
@@ -26,7 +25,6 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->integer('email_verification_code')->nullable();
-            $table->timestamp('email_verification_expires_at')->nullable();
 
             $table->string('password');
             $table->string('phone_number')->nullable();

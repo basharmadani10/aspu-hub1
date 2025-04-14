@@ -1,11 +1,15 @@
 <?php
 
 if (! function_exists('getModelForGuard')) {
-    function getModelForGuard(string $guard): ?string
+    /**
+     * @return string|null
+     */
+    function getModelForGuard(string $guard)
     {
-        return Spatie\Permission\Guard::getModelForGuard($guard);
+        return collect(config('auth.guards'))
+            ->map(fn ($guard) => isset($guard['provider']) ? config("auth.providers.{$guard['provider']}.model") : null)
+            ->get($guard);
     }
-
 }
 
 if (! function_exists('setPermissionsTeamId')) {

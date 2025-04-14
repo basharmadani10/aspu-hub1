@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -71,10 +71,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserSubject::class);
     }
-  public function posts()
+    public function posts()
     {
         return $this->morphMany(Post::class, 'location');
     }
-
+    
+    public function Subscribe_Communities() {
+    return $this->hasMany(Subscribe_Communities::class, 'user_id');   
+    }
 }
 
