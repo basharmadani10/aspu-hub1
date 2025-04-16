@@ -53,6 +53,7 @@ class PostController extends Controller
     }
    
     public function GetAllPost(Request $data){
+
         $user = $data->user();
         $user = User::with('Subscribe_Communities')->find($user->id);
         $community_ids = $user->Subscribe_Communities->pluck('community_id');
@@ -66,6 +67,7 @@ class PostController extends Controller
             'post' => $posts_comment,
             'user_post' => $user_post_comment
         ], 200);
+
     }
     public function AddImage(Request $data){
         $rules = [

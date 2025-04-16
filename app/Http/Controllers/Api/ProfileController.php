@@ -58,7 +58,7 @@ public function getUserPosts(Request $request)
     $user = $request->user();
 
     $posts = Post::where('user_id', $user->id)
-                ->with(['user','comments.user'])->where('user_id',$user->id) 
+
                 
                 ->get();
 
@@ -71,7 +71,11 @@ public function getUserComments(Request $request)
     $user = $request->user();
 
     $comments = Comment::where('user_id', $user->id)
+
                 ->with(['childComments.user','parentComment.user','user']) 
+
+                ->with(['childComments','parentComment','post']) 
+
                 ->orderBy('created_at', 'desc')
                 ->get();
 
