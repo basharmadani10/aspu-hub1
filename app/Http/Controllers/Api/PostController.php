@@ -53,12 +53,21 @@ class PostController extends Controller
     }
    
     public function GetAllPost(Request $data){
-    $user=$data->user();
-    $user=User::with('Subscribe_Communities')->where('id',$user->id)->first();
-    $Subscribe_Communities=$user->Subscribe_Communities;
-    $community_id=$Subscribe_Communities->pluck('community_id');    
-    $posts= Post::whereIn('community_id', $community_id)->get();
-    return response()->json($posts, 200);
+
+        $user = $data->user();
+        $user = User::with('Subscribe_Communities')->find($user->id);
+        $community_ids = $user->Subscribe_Communities->pluck('community_id');
+        $posts_comment = Post::whereIn('community_id', $community_ids)
+            ->with(['user', 'comments.User']) // post author + comment authors
+            ->get();
+        $user_post_comment = Post::where('user_id', $user->id)
+            ->with(['user', 'comments.User'])
+            ->get();
+        return response()->json([
+            'post' => $posts_comment,
+            'user_post' => $user_post_comment
+        ], 200);
+
     }
     public function AddImage(Request $data){
         $rules = [
