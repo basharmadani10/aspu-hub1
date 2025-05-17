@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Hash;
 class PostController extends Controller
 {public function Addpost(Request $request)
     {
-        // التحقق من البيانات
+
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
@@ -21,37 +21,36 @@ class PostController extends Controller
             'community_id' => 'required|exists:communities,id',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-    
-        // إنشاء البوست
+
         $post = Post::create([
             'title' => $request->title,
             'content' => $request->content,
             'typePost' => $request->typePost,
             'community_id' => $request->community_id,
-            'user_id' => auth()->id(), // أو $request->user_id حسب السياق
+            'user_id' => auth()->id(),
             'positiveVotes' => 0,
             'negativeVotes' => 0,
         ]);
-    
-        // رفع الصور وربطها بالبوست
+
+
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $imageName = time() . '_' . $image->getClientOriginalName();
                 $path = $image->storeAs('posts', $imageName, 'public');
-    
+
                 Photo::create([
                     'post_id' => $post->id,
                     'photo' => $path,
                 ]);
             }
         }
-    
+
         return response()->json([
             'message' => 'تم إنشاء البوست بنجاح مع الصور',
             'post' => $post->load('photos')
         ], 201);
     }
-   
+
     public function GetAllPost(Request $data){
 
         $user = $data->user();
@@ -85,8 +84,8 @@ class PostController extends Controller
         $image->move(public_path('uploads'), $imageName);
         $imagePath = asset('uploads/' . $imageName);
         $photo= new Photo();
-        
+
         return response()->json(['image_url' => $imagePath]);
     }
-   
+
 }

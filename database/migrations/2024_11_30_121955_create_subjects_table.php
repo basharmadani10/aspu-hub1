@@ -16,12 +16,11 @@ return new class extends Migration
         Schema::create('subjects', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->integer('hour_count');
-            $table->text('Description');
-            $table->float('paraticalMark');
-            $table->float('abstractMark');
+            $table->integer('hour_count')->nullable();
+            $table->text('Description')->nullable();
+            $table->float('paraticalMark')->nullable();
+            $table->float('abstractMark')->nullable();
            $table->unsignedBigInteger('SpecializationID');
-
             $table->foreign('SpecializationID')->references('SpecializationID')->on('specializations')->onDelete('cascade');
             $table->timestamps();
 

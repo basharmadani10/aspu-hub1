@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->date('start_date');
             $table->foreign(columns: 'userID')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign(columns: 'SpecializationID')->references('SpecializationID')->on('specializations')->onDelete('cascade');
+            $table->foreign('SpecializationID')->references('SpecializationID')->on('specializations')->onDelete('cascade');
             $table->date('end_date');
             $table->integer('semester_number');
             $table->integer('semester_hours');

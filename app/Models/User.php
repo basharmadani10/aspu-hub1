@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -26,7 +27,12 @@ class User extends Authenticatable
         'birth_date',
         'bio',
         'roleID',
-        'email_verification_code', ];
+        'email_verification_code',
+        'is_blocked',
+        'number_of_completed_hours'
+
+
+    ];
 
     protected $hidden = [
         'password',
@@ -39,7 +45,17 @@ class User extends Authenticatable
     ];
 
 
-
+    public function specializations()
+    {
+        return $this->hasManyThrough(
+            Specialization::class,
+            UserSemester::class,
+            'userID', // Foreign key on UserSemester table
+            'SpecializationID', // Foreign key on Specialization table
+            'id', // Local key on User table
+            'SpecializationID' // Local key on UserSemester table
+        );
+    }
 
     public function role()
     {
@@ -64,20 +80,27 @@ class User extends Authenticatable
 
     public function userSemesters()
     {
-        return $this->hasMany(UserSemester::class);
+        return $this->hasMany(UserSemester::class, 'userID');
     }
 
     public function userSubjects()
     {
-        return $this->hasMany(UserSubject::class);
+        return $this->hasMany(UserSubject::class, 'userID');
     }
+
+
+    public function previousSubjects()
+    {
+        return $this->hasMany(PreviousSubjects::class);
+    }
+
     public function posts()
     {
         return $this->morphMany(Post::class, 'location');
     }
-    
+
     public function Subscribe_Communities() {
-    return $this->hasMany(Subscribe_Communities::class, 'user_id');   
+    return $this->hasMany(Subscribe_Communities::class, 'user_id');
     }
 }
 

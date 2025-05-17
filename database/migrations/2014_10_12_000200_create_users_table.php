@@ -32,6 +32,8 @@ class CreateUsersTable extends Migration
             $table->string('current_location')->nullable();
             $table->unsignedBigInteger('roleID');
             $table->boolean('is_blocked')->default(false);
+            $table->integer('number_of_completed_hours')->default(0);
+ 
             $table->timestamps();
 
             // Uncomment this line if you have a roles table and want to set up a foreign key

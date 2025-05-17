@@ -21,7 +21,7 @@ class StudentAuthController extends Controller
         ]);
 
         $student = User::where('email', $request->email)
-            ->where('roleID', 1) // student in database (roles)
+            ->where('roleID', 1) 
             ->first();
 
         if (!$student || !Hash::check($request->password, $student->password)) {

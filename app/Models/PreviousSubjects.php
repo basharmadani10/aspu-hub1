@@ -15,8 +15,14 @@ class PreviousSubjects extends Model
         'previous_subject_id',
     ];
 
-    public function userSubject()
+    public function subject()
     {
-        return $this->belongsTo(UserSubject::class);
+        return $this->belongsTo(Subject::class, 'subjectID');
+    }
+
+    // علاقة المادة السابقة (المتطلب المسبق)
+    public function prerequisite()
+    {
+        return $this->belongsTo(Subject::class, 'PreviousSubjectID');
     }
 }

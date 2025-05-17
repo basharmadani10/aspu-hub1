@@ -17,13 +17,15 @@ return new class extends Migration
 
             $table->id();
             $table->unsignedBigInteger('userID');
-            $table->unsignedBigInteger('subectID');
-            $table->foreign('subectID')->references('id')->on('subjects')->onDelete('cascade');
+            $table->unsignedBigInteger('subjectID');
+            $table->float('mark')->default(0)->change();
+            $table->unsignedBigInteger('semesterID');
+            $table->foreign('subjectID')->references('id')->on('subjects')->onDelete('cascade');
             $table->foreign('userID')->references('id')->on('users')->onDelete('cascade');
-
+            $table->foreign('semesterID')->references('id')->on('user_semesters')->onDelete('cascade');
             $table->boolean('has_been_finished')->default(false);
             $table->boolean('has_been_canceled')->default(false);
-            $table->float('mark');
+
             $table->timestamps();
         });
     }

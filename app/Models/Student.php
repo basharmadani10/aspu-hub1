@@ -11,5 +11,5 @@ class Student extends Model
     use HasFactory;
     use HasApiTokens;
 
-    protected $guard = 'api'; // Specify the guard
+    protected $guard = 'api'; 
 }
