@@ -5,8 +5,11 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Comment;
+use App\Models\Subject;
 use App\Models\User;
 use App\Models\Post;
+use App\Models\UserSubject;
+use App\Notifications\NewMessageNotification;
 class ProfileController extends Controller
 {
     public function getProfile(Request $request)
@@ -20,14 +23,14 @@ class ProfileController extends Controller
         $user_semester=User::join('user_semesters', 'users.id', '=', 'user_semesters.userID')
         ->select('semester_number')
         ->first();
-        // $Semesternumber=$user_semester->semester_number;
+
         return response()->json([
             'id' => $user->id,
             'name' => $user->first_name,
             'bio' => $user->bio,
             'year' => $usersemester[$user_semester->semester_number],
             'profile_image' => $user->profile_image,
-           
+
         ]);
     }
     public function updateProfile(Request $request)
@@ -49,7 +52,7 @@ class ProfileController extends Controller
     $user->update($validated);
 
     return response()->json([
-        'message' => 'تم تحديث الملف الشخصي بنجاح',
+        'message' => 'profile updated successfult',
         'user' => $user
     ]);
 }
@@ -58,12 +61,14 @@ public function getUserPosts(Request $request)
     $user = $request->user();
 
     $posts = Post::where('user_id', $user->id)
+                   ->with('photos')
+                   ->get();
 
-                
-                ->get();
+    $username = $user->first_name;
 
     return response()->json([
-        'posts' => $posts
+        'username' => $username,
+        'posts'    => $posts
     ]);
 }
 public function getUserComments(Request $request)
@@ -72,9 +77,9 @@ public function getUserComments(Request $request)
 
     $comments = Comment::where('user_id', $user->id)
 
-                ->with(['childComments.user','parentComment.user','user']) 
+                ->with(['childComments.user','parentComment.user','user'])
 
-                ->with(['childComments','parentComment','post']) 
+                ->with(['childComments','parentComment','post'])
 
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -83,52 +88,31 @@ public function getUserComments(Request $request)
         'comments' => $comments
     ]);
 }
-public function votePost(Request $request)
-{
-    $validated = $request->validate([
-        'vote' => 'required|in:up,down'
-    ]);
 
-    $post = Post::findOrFail($request->postid);
 
-    if ($validated['vote'] === 'up') {
-        $post->positiveVotes += 1;
-    } else {
-        $post->negativeVotes += 1;
-    }
+public function Get_user_subject(Request $data) {
+    $user = $data->user();
 
-    $post->save();
+    $subjects = $user->userSubjects()->with('subject')->get()->pluck('subject');
 
-    return response()->json([
-        'message' => 'تم التصويت بنجاح',
-        'votes' => [
-            'positive' => $post->positiveVotes,
-            'negative' => $post->negativeVotes
-        ]
-    ]);
+    return response()->json($subjects, 200);
 }
-public function AddComment(Request $data){
-    {
-        $validated = $data->validate([
-            'content' => 'required|string',
-            'post_id' => 'required|exists:posts,id',
-            'parent_comment_id' => 'nullable|exists:comments,id'
-        ]);
-    
-        $comment = Comment::create([
-            'content' => $validated['content'],
-            'post_id' => $validated['post_id'],
-            'user_id' => auth()->id(), // أو $data->user()->id لو عامل Auth::guard
-            'parent_comment_id' => $validated['parent_comment_id'] ?? null,
-            'positive_votes' => 0,
-            'negative_votes' => 0,
-        ]);
-    
-        return response()->json([
-            'message' => 'تم إضافة التعليق بنجاح',
-            'comment' => $comment
-        ], 201);
-    }
-    
+public function Add_new_subject(Request $data){
+$user=$data->user();
+$subject_id=$data->subject_id;
+UserSubject::create([
+    'userID' => $user->id,
+    'subectID' => $data->subject_id,
+    'has_been_finished' => $data->has_been_finished,
+    'has_been_canceled' => $data->has_been_canceld,
+    'mark' =>$data->mark 
+
+]);
+return response()->json(["message"=>"subject Added succefully"], 200);
+}
+public function Get_subject_info(Request $data){
+    $subject_id=$data->header('subject_id');
+    $Subject=Subject::where('id',$subject_id)->first('Description');
+    return response()->json($Subject, 200);
 }
 }

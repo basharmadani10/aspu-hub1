@@ -13,15 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('docs', function (Blueprint $table) {
+        Schema::table('docs', function (Blueprint $table) {
 
-            $table->id('DocID');
-            $table->unsignedBigInteger('docs_type_id');
-            $table->foreign('docs_type_id')->references('id')->on('docs_types')->onDelete('cascade');
+            $table->unsignedBigInteger('subject_id')->nullable()->after('docs_type_id');
+            $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('cascade');
 
-            $table->string('doc_url');
+            $table->string('doc_name')->after('subject_id');
 
-            $table->timestamps();
         });
     }
 
@@ -32,6 +30,11 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('docs');
+        Schema::table('docs', function (Blueprint $table) {
+            $table->dropForeign(['subject_id']);
+            $table->dropColumn('subject_id');
+            $table->dropColumn('doc_name');
+
+        });
     }
 };

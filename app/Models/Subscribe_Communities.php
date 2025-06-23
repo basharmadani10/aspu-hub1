@@ -7,8 +7,31 @@ use Illuminate\Database\Eloquent\Model;
 
 class Subscribe_Communities extends Model
 {
-    use HasFactory;
-    public function User(){
-    return $this->belongsTo(User::class, 'user_id');
+
+    protected $fillable = [
+        'community_id',
+        'user_id',
+    ];
+
+
+
+
+    public function user() 
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function community()
+    {
+        return $this->belongsTo(Communitie::class, 'community_id');
+    }
+
+
+
+
+
+
+
+
+
 }

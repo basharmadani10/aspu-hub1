@@ -1,0 +1,57 @@
+.register {
+    width: 100vw;
+}
+.Accounts-Log {
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    justify-content:center;
+    margin-right:250px;
+    margin-top: -160px;
+    gap: 10px;
+    margin-left: 120px;
+}
+.space  {
+    margin-bottom: 20px;
+    color: gray;
+    font-size: 25px;
+}
+.register .Accounts-Log .same-Log {
+    width: 250px;
+    margin: 6px;
+    padding: 8px;
+    border-radius: 5px;
+    background-color: rgba(189, 189, 189, 0.272);
+    outline: none;
+    border: none;
+}
+.Forget {
+    display: flex;
+    text-align: center;
+    justify-content: center;
+}
+.Forget a {
+    margin-right: 14px;
+    text-align: center;
+}
+.Login-Btn {
+    color: white;
+    background-color: rgba(56, 56, 255, 0.984);
+    padding: 10px;
+    font-size: 24px;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    width: 190px;
+    margin-top: 8px;
+}
+a {
+    text-decoration: none;
+}
+footer {
+    margin-left: 100px;
+}
+h1 {
+    font-size: 27px;
+}

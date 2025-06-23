@@ -21,6 +21,7 @@ return new class extends Migration
             $table->float('paraticalMark')->nullable();
             $table->float('abstractMark')->nullable();
            $table->unsignedBigInteger('SpecializationID');
+           $table->string('status')->default('pending');
             $table->foreign('SpecializationID')->references('SpecializationID')->on('specializations')->onDelete('cascade');
             $table->timestamps();
 

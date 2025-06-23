@@ -9,6 +9,12 @@ class Specialization extends Model
 {
     use HasFactory;
 
+    // NEW: تحديد المفتاح الأساسي للجدول
+    protected $primaryKey = 'SpecializationID';
+    // NEW: تأكيد أن المفتاح الأساسي يتزايد تلقائياً (إذا كان كذلك في قاعدة البيانات)
+    public $incrementing = true;
+    // NEW: تحديد نوع المفتاح الأساسي (إذا كان غير int)
+    protected $keyType = 'int';
 
     protected $fillable = [
         'name',
@@ -18,11 +24,13 @@ class Specialization extends Model
 
     public function userSemesters()
     {
-        return $this->hasMany(UserSemester::class);
+        // استخدام المفتاح المحلي Explicitly لتجنب الالتباس إذا كان مختلفًا عن primaryKey الافتراضي
+        return $this->hasMany(UserSemester::class, 'SpecializationID', 'SpecializationID');
     }
 
     public function subjects()
     {
-        return $this->hasMany(Subject::class);
+        // استخدام المفتاح المحلي Explicitly لتجنب الالتباس إذا كان مختلفًا عن primaryKey الافتراضي
+        return $this->hasMany(Subject::class, 'SpecializationID', 'SpecializationID');
     }
 }

@@ -13,6 +13,14 @@ class Kernel extends ConsoleKernel
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
      */
+
+
+
+
+
+     protected $commands = [
+        \App\Console\Commands\ApproveSupervisorApplication::class,
+    ];
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
@@ -29,4 +37,6 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
+
+
 }

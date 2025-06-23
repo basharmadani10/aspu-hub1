@@ -11,11 +11,12 @@ class Subject extends Model
 
     protected $fillable = [
         'name',
-        'hour_count', // تأكد من تعبئة هذا الحقل
+        'hour_count',
         'Description',
-        'paraticalMark', // مطابق لحالة الأحرف في DB
-        'abstractMark',  // مطابق لحالة الأحرف في DB
-        'SpecializationID'
+        'paraticalMark',
+        'abstractMark',
+        'SpecializationID',
+        'status'
     ];
 
     public function specialization()
@@ -30,14 +31,15 @@ class Subject extends Model
     }
 
 
-    public function previousSubjects()
+    public function requiredPrerequisites()
     {
-        return $this->hasMany(PreviousSubjects::class, 'subjectID');
+        return $this->belongsToMany(Subject::class, 'previous_subjects', 'subjectID', 'PreviousSubjectID');
     }
 
 
-    public function prerequisites()
+    public function isPrerequisiteFor()
     {
-        return $this->hasMany(PreviousSubjects::class, 'PreviousSubjectID');
+        return $this->belongsToMany(Subject::class, 'previous_subjects', 'PreviousSubjectID', 'subjectID');
     }
+
 }

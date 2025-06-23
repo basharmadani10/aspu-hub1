@@ -6,6 +6,13 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use App\Observers\RequestJobObserver;
+
+use App\Models\RequestJob;
+
+
+
+
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -18,25 +25,34 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+
+
+
     ];
 
-    /**
-     * Register any events for your application.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        //
-    }
 
-    /**
-     * Determine if events and listeners should be automatically discovered.
-     *
-     * @return bool
-     */
+
+
+
+    protected $observers = [
+
+        RequestJob::class => [RequestJobObserver::class],
+    ];
+
+
+
+        public function boot()
+{
+    RequestJob::observe(RequestJobObserver::class);
+}
+    
+
     public function shouldDiscoverEvents()
     {
         return false;
     }
 }
+
+
+
+

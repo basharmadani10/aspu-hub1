@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aspu-api
+  namespace: default
+  labels:
+    app: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: aspu-api
+          image: bm106/aspu-api:v1.0.0
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits:
+              cpu: 400m
+              memory: 4000Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          env:
+            - name: DB_HOST
+              value: mysql
+            - name: DB_DATABASE
+              value: aspu
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: db-mysql
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-mysql
+                  key: password
+            - name: MAIL_MAILER
+              value: smtp
+            - name: MAIL_HOST
+              value: sandbox.smtp.mailtrap.io
+            - name: MAIL_PORT
+              value: "2525"
+            - name: MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: MAIL_USERNAME
+                  name: db-mysql
+            - name: MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: MAIL_PASSWORD
+                  name: db-mysql
+            - name: MAIL_FROM_ADDRESS
+              value: aspu-hub@edu.com
+            - name: MAIL_FROM_NAME
+              value: ASPU-HUB
+            - name: APP_URL
+              value: http://aspu-api.default.svc.cluster.local
+            - name: FRONTEND_URL
+              value: http://aspu-frontend.default.svc.cluster.local
+          ports:
+            - containerPort: 80
+              name: myapp
+            - containerPort: 2525
+              name: mail

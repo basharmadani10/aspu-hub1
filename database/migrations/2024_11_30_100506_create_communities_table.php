@@ -21,6 +21,27 @@ return new class extends Migration
             $table->integer('subscriber_count')->default(0);
             $table->timestamps();
         });
+
+
+
+        DB::table('communities')->insert([
+            [
+                'id' => 1,
+                'name' => 'global information technology'
+            ],
+            [
+                'id' => 2,
+                'name' => 'software'
+            ],
+            [
+                'id' => 3,
+                'name' => 'networking'
+            ],
+            [
+                'id' => 4,
+                'name' => 'ai'
+            ]
+        ]);
     }
 
     /**

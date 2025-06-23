@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aspu-ingress
+  annotations: {}
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: aspu.local
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: aspu-api
+                port:
+                  number: 80
+          - path: /storage
+            pathType: Prefix
+            backend:
+              service:
+                name: aspu-api
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: aspu-frontend-service
+                port:
+                  number: 80

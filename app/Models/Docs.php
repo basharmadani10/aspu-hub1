@@ -9,20 +9,32 @@ class Docs extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'DocID';
+    public $incrementing = true;
+    protected $keyType = 'int';
+
     protected $fillable = [
         'docs_type_id',
-        'user_subject_id',
-        'doc_name',
+        'subject_id', // أضفنا هذا
+        'doc_name',   // أضفنا هذا
         'doc_url',
     ];
 
     public function docsType()
     {
-        return $this->belongsTo(DocsType::class);
+        return $this->belongsTo(DocsType::class, 'docs_type_id');
     }
 
-    public function userSubject()
+    // علاقة مباشرة مع Subject
+    public function subject()
     {
-        return $this->belongsTo(UserSubject::class);
+        return $this->belongsTo(Subject::class, 'subject_id');
     }
+
+    // إذا كنت ترغب في معرفة من رفع المستند مستقبلاً، يمكنك إضافة حقل user_id في الهجرة
+    // وعلاقة هنا:
+    // public function uploader()
+    // {
+    //     return $this->belongsTo(User::class, 'user_id');
+    // }
 }

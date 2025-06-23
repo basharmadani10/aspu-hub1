@@ -23,6 +23,7 @@ return new class extends Migration
             $table->integer('positiveVotes')->default(0);
             $table->integer('negativeVotes')->default(0);
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->json('tags');
             $table->timestamps();
         });
     }

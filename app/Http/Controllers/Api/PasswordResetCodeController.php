@@ -17,15 +17,15 @@ class PasswordResetCodeController extends Controller
     {
         $request->validate(['email' => 'required|email|exists:users,email']);
 
-        // Generate a random 6-digit code
+
         $code = random_int(100000, 999999);
 
-        // Save the code in the database
+
         PasswordResetCode::updateOrInsert(
             ['email' => $request->email],
             [
                 'code' => $code,
-                'expires_at' => Carbon::now()->addMinutes(10), // Code valid for 10 minutes
+                'expires_at' => Carbon::now()->addMinutes(10),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ]
@@ -52,7 +52,7 @@ class PasswordResetCodeController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Check if the code exists and is not expired
+   
         $resetRecord = DB::table('password_reset_codes')
             ->where('email', $request->email)
             ->where('code', $request->code)
@@ -63,7 +63,7 @@ class PasswordResetCodeController extends Controller
             return response()->json(['error' => 'Invalid or expired code.'], 400);
         }
 
-        // Update the user's password
+
         $user = User::where('email', $request->email)->first();
         $user->password = bcrypt($request->password);
         $user->save();

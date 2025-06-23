@@ -33,7 +33,8 @@ class CreateUsersTable extends Migration
             $table->unsignedBigInteger('roleID');
             $table->boolean('is_blocked')->default(false);
             $table->integer('number_of_completed_hours')->default(0);
- 
+            $table->timestamp('email_code_sent_at')->nullable();
+
             $table->timestamps();
 
             // Uncomment this line if you have a roles table and want to set up a foreign key

@@ -9,20 +9,22 @@ class PreviousSubjects extends Model
 {
     use HasFactory;
 
-
+   
     protected $fillable = [
-        'user_subject_id',
-        'previous_subject_id',
+        'subjectID',
+        'PreviousSubjectID',
     ];
+
 
     public function subject()
     {
         return $this->belongsTo(Subject::class, 'subjectID');
     }
 
-    // علاقة المادة السابقة (المتطلب المسبق)
+
     public function prerequisite()
     {
         return $this->belongsTo(Subject::class, 'PreviousSubjectID');
     }
 }
+

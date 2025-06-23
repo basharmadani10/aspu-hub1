@@ -5,13 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Communitie;
 
 class Post extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'title', 'content', 'typePost', 'community_id', 'positiveVotes', 'negativeVotes', 'user_id'
+        'title', 'content', 'typePost', 'community_id', 'positiveVotes', 'negativeVotes', 'user_id', 'tags'
     ];
 
     public function photos(): HasMany
@@ -31,4 +32,31 @@ class Post extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+
+    public function postVotes(): HasMany
+    {
+        return $this->hasMany(PostVote::class);
+    }
+
+
+    public function community()
+{
+    return $this->belongsTo(Communitie::class, 'community_id');
+
+
 }
+
+
+public function reports()
+{
+    return $this->morphMany(Report::class, 'reportable');
+}
+
+
+
+
+}
+
+
+

@@ -8,186 +8,126 @@ use App\Models\Subject;
 use App\Models\User;
 use App\Models\UserSubject;
 use App\Models\UserSemester;
-use Illuminate\Http\Client\Request as ClientRequest;
+use App\Models\Communitie;
+use App\Models\Subscribe_Communities;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class UserSubjectController extends Controller
 {
-    public function getSelectableSubjects(Request $request)
+
+    public function getAllSubjectsForInitialSetup()
     {
-        $user = Auth::user();
-        $currentSemester = UserSemester::where('userID', $user->id)
-            ->orderBy('start_date', 'desc')
-            ->first();
 
-        if (!$currentSemester) {
-            return response()->json(['subjects' => []]);
-        }
-
-        $specializationID = $currentSemester->SpecializationID;
-
-        $subjects = Subject::where('SpecializationID', $specializationID)
-            ->orWhere('SpecializationID', 1)
-            ->get(['id', 'name', 'hour_count']);
-
-        return response()->json([
-            'subjects' => $subjects
-        ]);
+        $subjects = Subject::all(['id', 'name', 'hour_count']);
+        return response()->json(['subjects' => $subjects]);
     }
 
-    public function storeUserSubjects(Request $request)
+
+    public function submitInitialCompletedSubjects(Request $request)
     {
+        $request->validate(['subjects' => 'present|array']);
         $user = Auth::user();
-        $subjectIDs = $request->subjects;
 
-        $semester = UserSemester::where('userID', $user->id)
-            ->latest('id')
-            ->firstOrFail();
+       
+        $semester = UserSemester::firstOrCreate(['userID' => $user->id]);
 
-        foreach ($subjectIDs as $subjectID) {
-            $subject = Subject::find($subjectID);
-            if (!$subject) {
-                continue;
-            }
-
-            // تأكد من عدم تكرار المادة لنفس الطالب
-            $userSubject = UserSubject::where('userID', $user->id)
-                ->where('subjectID', $subjectID)
-                ->first();
-
-            if (!$userSubject) {
-                UserSubject::create([
-                    'userID' => $user->id,
-                    'subjectID' => $subjectID,
+        foreach ($request->subjects as $subjectID) {
+            UserSubject::updateOrCreate(
+                ['userID' => $user->id, 'subjectID' => $subjectID],
+                [
                     'semesterID' => $semester->id,
-                    'has_been_finished' => true,
-                    'has_been_canceled' => false,
-                ]);
-            } else {
-          
-                $userSubject->has_been_finished = true;
-                $userSubject->save();
-            }
+                    'has_been_finished' => true
+                ]
+            );
         }
 
-
-        $completedSubjects = UserSubject::where('userID', $user->id)
-            ->where('has_been_finished', true)
-            ->with('subject')
-            ->get();
-
-        $totalHours = $completedSubjects->sum(function ($item) {
-            return $item->subject->hour_count;
-        });
-
-        $user->number_of_completed_hours = $totalHours;
-        $user->save();
-
-        return response()->json([
-            'success' => true,
-            'total_completed_hours' => $totalHours,
-        ]);
+        return $this->recalculateAndUpdateHours($user);
     }
 
 
+    public function registerSubjectsForSemester(Request $request)
+    {
+        $request->validate(['subjects' => 'required|array']);
+        $user = Auth::user();
+        $semester = UserSemester::where('userID', $user->id)->latest('id')->firstOrFail();
 
-
-public function getAvailableSubjectsToSelect(Request $request)
-{
-    $user = Auth::user();
-
-    $currentSemester = UserSemester::where('userID', $user->id)
-        ->orderBy('start_date', 'desc')
-        ->first();
-
-    if (!$currentSemester) {
-        return response()->json(['subjects' => []]);
-    }
-
-    $specializationID = $currentSemester->SpecializationID;
-
-
-    $allSubjects = Subject::where('SpecializationID', $specializationID)
-        ->orWhere('SpecializationID', 1)
-        ->get();
-
-
-    $finishedSubjectIDs = UserSubject::where('userID', $user->id)
-        ->where('has_been_finished', true)
-        ->pluck('subjectID')
-        ->toArray();
-
-
-    $availableSubjects = $allSubjects->filter(function ($subject) use ($finishedSubjectIDs) {
-        return !in_array($subject->id, $finishedSubjectIDs);
-    })->values();
-
-    return response()->json([
-        'subjects' => $availableSubjects
-    ]);
-}
-
-
-public function confirmSelectedSubjectsThisSemester(Request $request)
-{
-    $user = Auth::user();
-    $subjectIDs = $request->subjects;
-
-
-    $currentSemester = UserSemester::where('userID', $user->id)
-        ->orderBy('start_date', 'desc')
-        ->firstOrFail();
-
-    $totalHours = 0;
-
-    foreach ($subjectIDs as $subjectID) {
-        $subject = Subject::find($subjectID);
-        if (!$subject) {
-            continue;
-        }
-
-        // إحضار المادة إن وجدت في جدول user_subjects
-        $userSubject = UserSubject::where('userID', $user->id)
-            ->where('subjectID', $subjectID)
-            ->first();
-
-        if ($userSubject) {
-            // إذا كانت المادة موجودة مسبقًا ولكن لم تُنهى
-            if (!$userSubject->has_been_finished) {
-                $userSubject->has_been_finished = true;
-                $userSubject->semesterID = $currentSemester->id; // تحديث الفصل
-                $userSubject->save();
-
-                $totalHours += $subject->hour_count;
-            }
-        } else {
-            // إذا لم تكن موجودة مسبقًا، يتم إضافتها وإنهاؤها مباشرة
+        foreach ($request->subjects as $subjectID) {
             UserSubject::create([
                 'userID' => $user->id,
                 'subjectID' => $subjectID,
-                'semesterID' => $currentSemester->id,
-                'has_been_finished' => true,
-                'has_been_canceled' => false,
+                'semesterID' => $semester->id,
+                'has_been_finished' => false
             ]);
-
-            $totalHours += $subject->hour_count;
         }
+
+        return response()->json(['message' => 'Subjects for the current semester registered successfully.'], 201);
     }
 
 
-    $currentSemester->semester_hours = $totalHours;
-    $currentSemester->save();
+    public function completeSubjects(Request $request)
+    {
+        $request->validate(['subjects' => 'required|array']);
+        $user = Auth::user();
 
-    return response()->json([
-        'success' => true,
-        'semester_hours' => $totalHours,
-        'message' => 'Subjects confirmed and semester hours updated.'
-    ]);
-}
+        UserSubject::where('userID', $user->id)
+            ->whereIn('subjectID', $request->subjects)
+            ->where('has_been_finished', false)
+            ->update(['has_been_finished' => true]);
+
+        return $this->recalculateAndUpdateHours($user);
+    }
 
 
+    public function changeSpecialization(Request $request)
+    {
+        $request->validate(['specialization' => 'required|string|exists:specializations,name']);
+        $user = Auth::user();
 
 
+        if ($user->number_of_completed_hours < 96) {
+            return response()->json(['message' => 'Insufficient hours to select a specialization.'], 403);
+        }
+
+        $newSpecializationName = $request->specialization;
+        $newCommunity = Communitie::where('name', $newSpecializationName)->firstOrFail();
+        $currentSubscription = Subscribe_Communities::where('user_id', $user->id)->first();
+
+        if ($currentSubscription && $currentSubscription->community_id == $newCommunity->id) {
+            return response()->json(['message' => 'User is already in the correct community.']);
+        }
+
+        DB::transaction(function () use ($user, $currentSubscription, $newCommunity) {
+            if ($currentSubscription) {
+                $oldCommunity = Communitie::find($currentSubscription->community_id);
+                $currentSubscription->delete();
+                if ($oldCommunity) $oldCommunity->decrement('subscriber_count');
+            }
+
+            Subscribe_Communities::create(['user_id' => $user->id, 'community_id' => $newCommunity->id]);
+            $newCommunity->increment('subscriber_count');
+        });
+
+        return response()->json(['message' => 'Specialization and community subscription updated successfully.']);
+    }
+
+
+    private function recalculateAndUpdateHours(User $user)
+    {
+        $completedSubjects = UserSubject::where('userID', $user->id)
+            ->where('has_been_finished', true)
+            ->with('subject:id,hour_count')
+            ->get();
+
+        $totalHours = $completedSubjects->sum('subject.hour_count');
+        $user->update(['number_of_completed_hours' => $totalHours]);
+
+        $isSpecializationTime = ($totalHours >= 96);
+
+        return response()->json([
+            'success' => true,
+            'is_specialization_time' => $isSpecializationTime,
+            'total_completed_hours' => $totalHours,
+        ]);
+    }
 }
