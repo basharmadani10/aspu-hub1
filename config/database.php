@@ -124,27 +124,65 @@ return [
         'client' => env('REDIS_CLIENT', 'phpredis'),
 
         'options' => [
+            // هذا الخيار 'cluster' يشير إلى وضع Redis Cluster الفعلي.
+            // إذا كنت تستخدم Master/Replica، فهذا لا ينطبق مباشرة على تقسيم القراءة/الكتابة.
+            // غالباً ما يكون مفيداً في Redis Cluster الحقيقي أو لـ Predis.
             'cluster' => env('REDIS_CLUSTER', 'redis'),
             'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
         ],
 
+        // -------------------------------------------------------------------
+        // START: التعديلات هنا
+        // -------------------------------------------------------------------
+
         'default' => [
             'url' => env('REDIS_URL'),
-            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'host' => env('REDIS_HOST', '127.0.0.1'), // هذا هو Master لعمليات الكتابة
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_DB', '0'),
+            'read' => [ // هنا يتم تحديد إعدادات الـ Replica لعمليات القراءة
+                'host' => env('REDIS_REPLICA_HOST', '127.0.0.1'), // hostname أو IP لـ Replicas
+                'password' => env('REDIS_PASSWORD'), // Replicas غالباً تستخدم نفس كلمة مرور Master
+                'port' => env('REDIS_REPLICA_PORT', '6379'), // منفذ الـ Replicas
+                'database' => env('REDIS_DB', '0'), // قاعدة بيانات الـ Replicas (يمكن أن تكون مختلفة)
+            ],
         ],
 
         'cache' => [
             'url' => env('REDIS_URL'),
-            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'host' => env('REDIS_HOST', '127.0.0.1'), // هذا هو Master لعمليات الكتابة الخاصة بالـ cache
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_CACHE_DB', '1'),
+            'read' => [ // هنا يتم تحديد إعدادات الـ Replica لعمليات القراءة الخاصة بالـ cache
+                'host' => env('REDIS_REPLICA_HOST', '127.0.0.1'),
+                'password' => env('REDIS_PASSWORD'),
+                'port' => env('REDIS_REPLICA_PORT', '6379'),
+                'database' => env('REDIS_CACHE_DB', '1'),
+            ],
         ],
+        // إذا كان لديك اتصال 'sessions' منفصل، أضف نفس إعداد 'read' له أيضاً:
+        // 'sessions' => [
+        //     'url' => env('REDIS_URL'),
+        //     'host' => env('REDIS_HOST', '127.0.0.1'),
+        //     'username' => env('REDIS_USERNAME'),
+        //     'password' => env('REDIS_PASSWORD'),
+        //     'port' => env('REDIS_PORT', '6379'),
+        //     'database' => env('REDIS_SESSION_DB', '2'),
+        //     'read' => [
+        //         'host' => env('REDIS_REPLICA_HOST', '127.0.0.1'),
+        //         'password' => env('REDIS_PASSWORD'),
+        //         'port' => env('REDIS_REPLICA_PORT', '6379'),
+        //         'database' => env('REDIS_SESSION_DB', '2'),
+        //     ],
+        // ],
+
+        // -------------------------------------------------------------------
+        // END: التعديلات
+        // -------------------------------------------------------------------
 
     ],
 

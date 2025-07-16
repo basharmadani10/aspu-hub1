@@ -7,7 +7,10 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\CommunityController;
 use App\Http\Controllers\Admin\SubjectController;
+use App\Http\Controllers\Admin\CommunityPostController;
 use App\Http\Controllers\Admin\TagController;
+use App\Http\Controllers\Admin\RoadmapController;
+use App\Http\Controllers\Admin\CommunityMemberController;
 
 use App\Http\Controllers\Admin\AdminProfileController;
 
@@ -15,21 +18,8 @@ use App\Http\Controllers\Admin\AdminProfileController;
 
 use App\Http\Controllers\Admin\AdminDocsController;
 
+use App\Http\Controllers\Admin\SpecializationController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| هنا يتم تسجيل جميع مسارات الويب لتطبيقك.
-|
-*/
-
-// =========================================================================
-// == Public Routes (Accessible to Guests)
-// =========================================================================
-
-// Redirect the root URL to the admin login page
 Route::get('/', function () {
     return redirect()->route('supervisor.register.create');
 });
@@ -74,6 +64,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('subjects', SubjectController::class)->except(['show']);
 
     Route::resource('docs', AdminDocsController::class)->except(['show', 'edit', 'update']);
+    Route::resource('roadmaps', RoadmapController::class);
+
+
+    Route::resource('specializations', SpecializationController::class);
+
+    Route::resource('communities', CommunityController::class);
+    Route::get('communities/{community}/members', [\App\Http\Controllers\Admin\CommunityMemberController::class, 'index'])
+    ->name('communities.members.index');
+
+
+
+
+
+
+
+    Route::resource('communities.posts', CommunityPostController::class)->only(['index', 'destroy']);
 
         // NEW: Document Management Routes
 
@@ -92,4 +98,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // For example:
     // Route::get('applications', [App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');
     // Route::post('applications/{application}/approve', [App\Http\Controllers\Admin\ApplicationController::class, 'approve'])->name('applications.approve');
+
+
+    Route::get('users/{user}', [CommunityMemberController::class, 'showUserInfo'])->name('users.show');
+    Route::put('users/{user}/toggle-block', [CommunityMemberController::class, 'toggleBlock'])->name('users.toggleBlock');
+
 });

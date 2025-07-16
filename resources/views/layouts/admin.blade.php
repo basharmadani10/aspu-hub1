@@ -55,6 +55,12 @@
                     Community Mgmt
                 </a>
 
+                <a href="{{ route('admin.specializations.index') }}" class="{{ active_class(['admin.specializations.*']) }}">
+                    {{-- Updated SVG for Specialization Mgmt to a book icon --}}
+                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2zm2-2h12V5H6v12z"></path></svg>
+                    Specialization Mgmt
+                </a>
+
                 <a href="{{ route('admin.subjects.index') }}" class="{{ active_class(['admin.subjects.*']) }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
                     Subject Mgmt
@@ -70,6 +76,12 @@
                     Manage Lectures
                 </a>
 
+                <a href="{{ route('admin.roadmaps.index') }}" class="{{ active_class(['admin.roadmaps.*']) }} flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                    </svg>
+                    <span class="font-medium">Roadmaps</span>
+                </a>
                 <a href="{{ route('admin.profile.show') }}" class="{{ active_class(['admin.profile.*']) }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                     My Profile

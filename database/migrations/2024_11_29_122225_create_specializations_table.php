@@ -25,28 +25,7 @@ return new class extends Migration
         });
 
 
-        DB::table('specializations')->insert([
-            [
-                'SpecializationID' => 1,
-                'name' => 'global information technology',
-                'description' => 'Comprehensive IT education covering multiple disciplines'
-            ],
-            [
-                'SpecializationID' => 2,
-                'name' => 'software',
-                'description' => 'Software development and engineering focus'
-            ],
-            [
-                'SpecializationID' => 3,
-                'name' => 'networking',
-                'description' => 'Network infrastructure and security'
-            ],
-            [
-                'SpecializationID' => 4,
-                'name' => 'ai',
-                'description' => 'Artificial intelligence and machine learning'
-            ]
-        ]);
+
     }
 
     /**

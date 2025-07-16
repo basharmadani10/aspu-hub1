@@ -4,10 +4,17 @@
 <main class="flex-1 p-8">
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-3xl font-bold text-gray-800">My Supervised Communities</h2>
-        <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-100 rounded-lg hover:bg-indigo-200">
-            &larr; Back to Dashboard
+        {{-- Added button to create new community --}}
+        <a href="{{ route('admin.communities.create') }}" class="px-5 py-2 font-semibold text-white bg-indigo-600 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <span>+</span> Add New Community
         </a>
     </div>
+
+    @if(session('success'))
+        <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+            {{ session('success') }}
+        </div>
+    @endif
 
     <div class="bg-white rounded-lg shadow-md">
         <div class="p-4">
@@ -26,8 +33,14 @@
                             <td class="p-3 font-medium text-gray-800">{{ $community->name }}</td>
                             <td class="p-3 text-gray-600">{{ $community->total_subscribers }}</td>
                             <td class="p-3 text-gray-600">{{ $community->student_subscribers }}</td>
-                            <td class="p-3 text-sm text-center">
-                                <a href="#" class="px-3 py-1 font-medium text-indigo-600 bg-indigo-100 rounded-md hover:bg-indigo-200">Manage</a>
+                            <td class="p-3 text-sm text-center space-x-2"> {{-- Added space-x-2 for button spacing --}}
+                                <a href="{{ route('admin.communities.show', $community->id) }}" class="px-3 py-1 font-medium text-indigo-600 bg-indigo-100 rounded-md hover:bg-indigo-200">Manage</a>
+                                <a href="{{ route('admin.communities.edit', $community->id) }}" class="px-3 py-1 font-medium text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200">Edit</a>
+                                <form action="{{ route('admin.communities.destroy', $community->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this community? This action cannot be undone.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="px-3 py-1 font-medium text-red-600 bg-red-100 rounded-md hover:bg-red-200">Delete</button>
+                                </form>
                             </td>
                         </tr>
                     @empty

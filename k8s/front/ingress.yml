@@ -1,0 +1,56 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aspu-hub-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/rewrite-target: / # هذا هو المفتاح
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: aspu-hub.com
+    http:
+      paths:
+      - path: /api # كل مسارات الـ API (بما فيها /api/student) ستمر من هنا
+        pathType: Prefix
+        backend:
+          service:
+            name: aspu-api
+            port:
+              number: 80
+      - path: /storage # إذا كانت الواجهة الأمامية تطلب /storage/، أبقِها
+        pathType: Prefix
+        backend:
+          service:
+            name: aspu-api
+            port:
+              number: 80
+      - path: /admin
+        pathType: Prefix
+        backend:
+          service:
+            name: aspu-web
+            port:
+              number: 80
+      - path: /supervisor
+        pathType: Prefix
+        backend:
+          service:
+            name: aspu-web
+            port:
+              number: 80
+      # ⚠️ قم بإزالة هذا المسار لتجنب التعارض والالتباس
+      # - path: /student
+      #   pathType: Prefix
+      #   backend:
+      #     service:
+      #       name: aspu-api
+      #       port:
+      #         number: 80
+      - path: / # مسار الواجهة الأمامية
+        pathType: Prefix
+        backend:
+          service:
+            name: aspu-frontend-service
+            port:
+              number: 80

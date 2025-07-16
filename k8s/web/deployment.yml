@@ -1,0 +1,142 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aspu-web
+  namespace: default
+  labels:
+    app: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: aspu-web
+          image: bm106/aspu-api:v4.0.2
+          resources:
+            requests:
+              cpu: 200m
+              memory: 500Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          env:
+            - name: APP_ENV
+              value: production
+            - name: APP_DEBUG
+              value: "false"
+            - name: LOG_CHANNEL
+              value: stderr
+            - name: APP_URL
+              value: http://aspu-hub.com
+            - name: FRONTEND_URL
+              value: http://aspu-hub.com
+            - name: TRUSTED_PROXIES
+              value: "*"
+            - name: APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: web-app-key
+                  key: APP_KEY
+            - name: DB_CONNECTION
+              value: mysql
+            - name: DB_HOST
+              value: mysql
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_DATABASE
+              value: aspu
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: web-db-secrets
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: web-db-secrets
+                  key: DB_PASSWORD
+            - name: MAIL_MAILER
+              value: smtp
+            - name: MAIL_HOST
+              value: smtp.gmail.com
+            - name: MAIL_PORT
+              value: "587"
+            - name: MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: web-mail-secrets
+                  key: MAIL_USERNAME
+            - name: MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: web-mail-secrets
+                  key: MAIL_PASSWORD
+            - name: MAIL_FROM_ADDRESS
+              value: aspuhub@gmail.com
+            - name: MAIL_FROM_NAME
+              value: ASPU-HUB
+          ports:
+            - containerPort: 80
+              name: http-web
+            - containerPort: 587
+              name: mail-port
+          volumeMounts:
+            - name: web-storage-volume
+              mountPath: /var/www/html/storage/app/public
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - >
+                  php -r 'try {
+                    $host = getenv("DB_HOST");
+                    $port = getenv("DB_PORT");
+                    $db   = getenv("DB_DATABASE");
+                    $user = getenv("DB_USERNAME");
+                    $pass = getenv("DB_PASSWORD");
+                    new PDO("mysql:host=$host;port=$port;dbname=$db", $user, $pass);
+                    echo "DB OK\n";
+                    exit(0);
+                  } catch (Exception $e) {
+                    echo "DB FAIL: " . $e->getMessage() . "\n";
+                    exit(1);
+                  }'
+            initialDelaySeconds: 30
+            periodSeconds: 1800
+            timeoutSeconds: 10
+            failureThreshold: 1
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - >
+                  php -r 'try {
+                    $host = getenv("DB_HOST");
+                    $port = getenv("DB_PORT");
+                    $db   = getenv("DB_DATABASE");
+                    $user = getenv("DB_USERNAME");
+                    $pass = getenv("DB_PASSWORD");
+                    new PDO("mysql:host=$host;port=$port;dbname=$db", $user, $pass);
+                    echo "DB OK\n";
+                    exit(0);
+                  } catch (Exception $e) {
+                    echo "DB FAIL: " . $e->getMessage() . "\n";
+                    exit(1);
+                  }'
+            initialDelaySeconds: 60
+            periodSeconds: 1800
+            timeoutSeconds: 10
+            failureThreshold: 1
+
+      volumes:
+        - name: web-storage-volume
+          persistentVolumeClaim:
+            claimName: laravel-storage-pvc

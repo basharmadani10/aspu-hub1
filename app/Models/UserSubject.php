@@ -33,10 +33,12 @@ class UserSubject extends Model
         return $this->belongsTo(User::class, 'userID' );
     }
 
+
     public function subject()
-    {
-        return $this->belongsTo(Subject::class, 'subjectID');
-    }
+{
+    return $this->belongsTo(Subject::class, 'subjectID', 'id');
+}
+
 
 
 

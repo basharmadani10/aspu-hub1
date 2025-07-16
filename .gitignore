@@ -1,8 +1,8 @@
 /bootstrap/compiled.php
 /vendor
+/storage/.*
 
-
-
+/AI
 
 
 /app/tests/_log

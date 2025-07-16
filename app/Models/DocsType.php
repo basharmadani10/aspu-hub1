@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class DocsType extends Model
 {
     use HasFactory;
-
+    protected $primaryKey = 'id';
     protected $fillable = [
         'name',
         'description',

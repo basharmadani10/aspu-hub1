@@ -18,6 +18,7 @@ class Communitie extends Model
         'image',
         'cover_image',
         'subscriber_count',
+ 
     ];
 
 
@@ -35,6 +36,6 @@ class Communitie extends Model
 
     public function posts()
     {
-        return $this->morphMany(Post::class, 'location');
+        return $this->hasMany(Post::class, 'community_id');
     }
 }

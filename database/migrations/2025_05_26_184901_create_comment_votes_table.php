@@ -15,7 +15,7 @@ return new class extends Migration
             $table->enum('vote_type', ['up', 'down']);
             $table->timestamps();
 
-            $table->unique(['user_id', 'comment_id']); // المستخدم يصوت مرة واحدة على نفس التعليق
+            $table->unique(['user_id', 'comment_id']); 
         });
     }
 

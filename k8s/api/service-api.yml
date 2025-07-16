@@ -8,7 +8,7 @@ spec:
     app: api
   type: NodePort
   ports:
-    - name: api
+    - name: http-api
       protocol: TCP
       port: 80
       targetPort: 80

@@ -97,7 +97,7 @@ class PostController extends Controller
                         }
                     }
                 }
-                return $newPost; // Return the post from the transaction
+                return $newPost; 
             });
 
             return response()->json([
@@ -160,9 +160,7 @@ class PostController extends Controller
                 }
             }
 
-            // Section 3: Update text and tags
             if ($request->has('tags')) {
-                // (Your existing tag update logic would go here)
                 $post->tags = $request->input('tags');
             }
 
@@ -182,9 +180,6 @@ class PostController extends Controller
         }
     }
 
-    /**
-     * Delete a post.
-     */
     public function deletePost(Post $post)
     {
         if ($post->user_id !== auth()->id()) {
@@ -277,6 +272,55 @@ class PostController extends Controller
         }
     }
 
+    public function userpost()
+    {
+        $userId = Auth::id();
+
+        $posts = Post::where('user_id', $userId)
+                      // Eager load user data (specifically profile_image) and photos
+                      ->with(['user:id,f_name,l_name,name,profile_image', 'photos', 'comments.user:id,f_name,l_name,name,profile_image'])
+                      ->latest()
+                      ->get();
+
+        $posts->each(function ($post) {
+            // **IMPORTANT: Set `author_image` with full URL for the post author**
+            if ($post->user && $post->user->profile_image) {
+                $post->author_image = url(Storage::url($post->user->profile_image));
+            } else {
+                // Fallback if no profile image is set for the author
+                $post->author_image = "https://placehold.co/48x48/CCCCCC/333333?text=User";
+            }
+
+            // **IMPORTANT: Set `image_url` for the post's main image**
+            if ($post->photos->isNotEmpty()) {
+                // Assuming you want the first photo as the main post image
+                $post->image_url = url(Storage::url($post->photos->first()->photo));
+            } else {
+                $post->image_url = null; // Or a default image URL if no photo exists
+            }
+
+            // Decode tags if they are stored as JSON strings
+            if (is_string($post->tags)) {
+                $post->tags = json_decode($post->tags, true);
+            } else {
+                $post->tags = []; // Ensure it's an array even if empty or null
+            }
+
+            // Handle comment author profile images (if comments are also loaded)
+            $post->comments->each(function ($comment) {
+                if ($comment->user && $comment->user->profile_image) {
+                    $comment->user->author_image = url(Storage::url($comment->user->profile_image));
+                } else {
+                    $comment->user->author_image = "https://placehold.co/48x48/CCCCCC/333333?text=User";
+                }
+            });
+        });
+
+        return response()->json([
+            'message' => 'User posts retrieved successfully.',
+            'posts' => $posts
+        ], 200);
+    }
 
 
     public function report(Request $request, Post $post)
@@ -294,5 +338,5 @@ class PostController extends Controller
 
         return response()->json(['message' => 'Your report has been submitted successfully.'], 201);
 
-}
+    }
 }

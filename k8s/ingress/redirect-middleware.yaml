@@ -1,0 +1,10 @@
+# redirect-middleware.yaml
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-to-https
+  namespace: default # <<< IMPORTANT: This should be the same namespace as your Ingress resource (likely 'default' based on your previous Ingress)
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true # Use permanent redirect (HTTP 301), which is good for SEO

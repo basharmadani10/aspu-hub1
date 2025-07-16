@@ -19,6 +19,13 @@ return new class extends Migration
                   ->on('docs_types')
                   ->onDelete('cascade');
         });
+
+
+
+        DB::table('docs_types')->insert([
+            ['name' => 'Lecture', 'description' => 'Official lectures for subjects'],
+            ['name' => 'Summary', 'description' => 'Summaries of lessons or topics'],
+        ]);
     }
 
     public function down()

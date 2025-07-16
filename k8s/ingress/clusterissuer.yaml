@@ -1,0 +1,19 @@
+# clusterissuer.yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod # This name ('letsencrypt-prod') is important, it will be referenced in your Ingress later.
+spec:
+  acme:
+    # The ACME server URL for Let's Encrypt production environment
+    server: https://acme-v02.api.letsencrypt.org/directory
+    # Email address to register with ACME server (important for expiry notifications)
+    email: aspuhub@gmail.com # <<< IMPORTANT: REPLACE THIS WITH YOUR ACTUAL EMAIL ADDRESS
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: letsencrypt-prod-account-key # cert-manager will create this secret
+    # Enable the HTTP-01 challenge for domain validation
+    solvers:
+    - http01:
+        ingress:
+          class: traefik # This MUST match your ingressClassName defined in your Ingress resource later.

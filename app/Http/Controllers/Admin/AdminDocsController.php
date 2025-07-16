@@ -19,7 +19,7 @@ class AdminDocsController extends Controller
      */
     public function index()
     {
-        // جلب جميع المستندات مع علاقاتها (Subject و DocsType)
+
         $docs = Docs::with('docsType', 'subject')
                     ->latest()
                     ->paginate(10);
@@ -38,12 +38,7 @@ class AdminDocsController extends Controller
         return view('admin.docs.create', compact('docsTypes', 'subjects'));
     }
 
-    /**
-     * Store a newly created document in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -67,12 +62,7 @@ class AdminDocsController extends Controller
         return redirect()->route('admin.docs.index')->with('success', 'Document uploaded successfully!');
     }
 
-    /**
-     * Remove the specified document from storage.
-     *
-     * @param  \App\Models\Docs  $doc
-     * @return \Illuminate\Http\RedirectResponse
-     */
+
     public function destroy(Docs $doc)
     {
         $filePath = str_replace('/storage/', 'public/', $doc->doc_url);

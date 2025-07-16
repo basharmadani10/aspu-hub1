@@ -23,25 +23,6 @@ return new class extends Migration
         });
 
 
-
-        DB::table('communities')->insert([
-            [
-                'id' => 1,
-                'name' => 'global information technology'
-            ],
-            [
-                'id' => 2,
-                'name' => 'software'
-            ],
-            [
-                'id' => 3,
-                'name' => 'networking'
-            ],
-            [
-                'id' => 4,
-                'name' => 'ai'
-            ]
-        ]);
     }
 
     /**

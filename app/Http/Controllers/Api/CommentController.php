@@ -11,8 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Notifications\NewMessageNotification; // Assuming this notification class exists
-
+use App\Notifications\NewMessageNotification; 
 class CommentController extends Controller
 {
 

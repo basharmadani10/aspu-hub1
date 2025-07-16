@@ -1,0 +1,59 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aspu-hub-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+  - host: aspu-hub.com
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: aspu-api
+            port:
+              number: 80
+      - path: /storage
+        pathType: Prefix
+        backend:
+          service:
+            name: aspu-api
+            port:
+              number: 80
+      - path: /admin
+        pathType: Prefix
+        backend:
+          service:
+            name: aspu-api
+            port:
+              number: 80
+      - path: /supervisor
+        pathType: Prefix
+        backend:
+          service:
+            name: aspu-api
+            port:
+              number: 80
+      # 👇 ADD THIS NEW RULE FOR /student AND OTHER API ENDPOINTS
+      - path: /student
+        pathType: Prefix
+        backend:
+          service:
+            name: aspu-api
+            port:
+              number: 80
+      # You might consider a more generic API path for clarity if all API endpoints live under /api or a specific prefix
+      # For example, if your API base URL is always aspu-hub.com/api, then the /api rule is sufficient.
+      # But since your frontend uses /student/profile/upload-image, you need a rule for /student.
+
+      # Catch-all for frontend - MUST be the last rule if pathType is Prefix for '/'
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: aspu-frontend-service
+            port:
+              number: 80

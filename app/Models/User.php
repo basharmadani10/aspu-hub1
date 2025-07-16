@@ -2,19 +2,14 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
 use Laravel\Sanctum\HasApiTokens;
-
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
-
-
 
     protected $fillable = [
         'first_name',
@@ -30,11 +25,9 @@ class User extends Authenticatable
         'roleID',
         'email_verification_code',
         'is_blocked',
-        'number_of_completed_hours'
-
-
-
-
+        'number_of_completed_hours',
+        'image',
+        'initial_subjects_configured', // **NEW: Add this field**
     ];
 
     protected $hidden = [
@@ -45,8 +38,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_blocked' => 'boolean',
-
-
+        'initial_subjects_configured' => 'boolean', // **NEW: Cast as boolean**
     ];
 
     public function managedCommunities()
@@ -54,21 +46,21 @@ class User extends Authenticatable
         return $this->hasMany(Community_Manager::class, 'user_id');
     }
 
-
     public function subscribedCommunities()
     {
         return $this->hasMany(Subscribe_Communities::class, 'user_id');
     }
 
+    // The Many-to-Many relationship with Specialization via UserSemester
     public function specializations()
     {
         return $this->hasManyThrough(
             Specialization::class,
             UserSemester::class,
-            'userID', // Foreign key on UserSemester table
-            'SpecializationID', // Foreign key on Specialization table
-            'id', // Local key on User table
-            'SpecializationID' // Local key on UserSemester table
+            'userID',         // Foreign key on user_semesters table
+            'SpecializationID', // Foreign key on specializations table (or UserSemester points to it)
+            'id',             // Local key on users table
+            'SpecializationID'  // Local key on specializations table (if different from 'id')
         );
     }
 
@@ -77,13 +69,10 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class, 'roleID');
     }
 
-
-
     public function requestJobs()
     {
         return $this->hasMany(RequestJob::class);
     }
-
 
     public function comments()
     {
@@ -110,9 +99,10 @@ class User extends Authenticatable
         return $this->hasMany(UserSubject::class, 'userID');
     }
 
-
     public function previousSubjects()
     {
+        // Keep this if you have a separate 'previous_subjects' table.
+        // If it's handled via 'user_subjects' with 'has_been_finished', this relation might be redundant.
         return $this->hasMany(PreviousSubjects::class);
     }
 
@@ -121,23 +111,18 @@ class User extends Authenticatable
         return $this->morphMany(Post::class, 'location');
     }
 
-    public function Subscribe_Communities() {
-    return $this->hasMany(Subscribe_Communities::class, 'user_id');
+    public function Subscribe_Communities()
+    {
+        return $this->hasMany(Subscribe_Communities::class, 'user_id');
     }
-
 
     public function subscriptions()
     {
         return $this->hasMany(Subscribe_Communities::class, 'user_id');
     }
 
-
     public function isAdmin(): bool
     {
-
         return $this->roleID === 2;
     }
-
-
 }
-

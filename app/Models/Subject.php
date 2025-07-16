@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Docs;
 
 class Subject extends Model
 {
@@ -16,9 +17,15 @@ class Subject extends Model
         'paraticalMark',
         'abstractMark',
         'SpecializationID',
-        'status'
+        'status',
+        'references'
     ];
 
+
+
+    protected $casts = [
+        'references' => 'array', 
+    ];
     public function specialization()
     {
         return $this->belongsTo(Specialization::class, 'SpecializationID');
@@ -42,4 +49,11 @@ class Subject extends Model
         return $this->belongsToMany(Subject::class, 'previous_subjects', 'PreviousSubjectID', 'subjectID');
     }
 
+
+
+    public function docs()
+    {
+        // Change Doc::class to Docs::class
+        return $this->hasMany(Docs::class, 'subject_id'); // <--- CORRECTED: Using Docs::class and 'subject_id' as foreign key
+    }
 }

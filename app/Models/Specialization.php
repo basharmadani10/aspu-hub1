@@ -30,7 +30,13 @@ class Specialization extends Model
 
     public function subjects()
     {
-        // استخدام المفتاح المحلي Explicitly لتجنب الالتباس إذا كان مختلفًا عن primaryKey الافتراضي
+
         return $this->hasMany(Subject::class, 'SpecializationID', 'SpecializationID');
+    }
+
+
+    public function roadmaps()
+    {
+        return $this->hasMany(Roadmap::class, 'specialization_id', 'SpecializationID');
     }
 }
