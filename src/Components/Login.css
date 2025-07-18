@@ -1,0 +1,89 @@
+.register {
+width: 100vw;
+}
+.Accounts-Log {
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    justify-content:center;
+    margin-right:130px;
+    margin-top: -100px;
+    gap: 10px;
+    margin-left: 120px;
+}
+.space  {
+    margin-bottom: 20px;
+    color: gray;
+    font-size: 25px;
+}
+.register .Accounts-Log .same-Log {
+width: 250px;
+margin: 6px;
+padding: 8px;
+border-radius: 5px;
+background-color: rgba(189, 189, 189, 0.272);
+outline: none;
+border: none;
+}
+.Forget {
+    display: flex;
+    text-align: center;
+    justify-content: center;
+ 
+}
+.Forget a {
+    margin-right: 14px;
+    text-align: center;
+}
+.Login-Btn {
+    color: white;
+ background: linear-gradient(to top right, #4f46e5, #60a5fa);
+    padding: 10px;
+    font-size: 24px;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    width: 150px;
+    margin-top: 25px;
+    border-radius: 15px;
+}
+a {
+    text-decoration: none;
+}
+footer {
+    margin-left: 100px;
+    margin-bottom: 50px;
+}
+h1 {
+    font-size: 27px;
+}
+.DontNew {
+margin-bottom: 60px;
+margin-left: 100px;
+}
+.AdminLog {
+font-size: 22px;
+margin-left: 25px;
+margin-top: 30px;
+}
+
+
+/*background: linear-gradient(to top right, #4f46e5, #60a5fa);
+padding: 12px;
+border-radius: 15px;
+color: white;
+    
+    */
+    .explain {
+        margin-top: 30px;
+        padding: 50px;
+        letter-spacing: 1px;
+        font-family:Georgia, 'Times New Roman', Times, serif;
+    }
+    .newTitle {
+        margin-top: 200px;
+        font-size: 30px;
+    font-family:Georgia, 'Times New Roman', Times, serif;
+
+    }

@@ -1,0 +1,104 @@
+.register {
+    display: flex;
+    justify-content: space-between;
+    overflow: hidden; /* Prevent scrolling */
+    width: 100vw;
+}
+.Welcome{
+  /*  background-color: rgba(56, 56, 255, 0.984); */  
+  background: linear-gradient(to top right, #4f46e5, #60a5fa);
+    height: 100vh;
+    color: white;
+    position: relative;
+  width: 50%;
+  max-width: 800px;
+  text-align: center;
+}
+.circle {
+    position: absolute;
+    border-radius: 50%;
+  }
+  
+  .yellow-circle {
+    width: 150px;
+    height: 150px;
+    background-color: #ffcc57;
+    top: -50px;
+    right: 20px;
+  }
+  
+  .blue-circle {
+    width: 120px;
+    height: 120px;
+    background-color: #002d62; 
+    bottom: -50px;
+    left: 10px;
+  }
+
+
+.Title{
+    margin-top: 60px;
+    margin-right: 200px;
+    margin-bottom: 25px;
+}
+.explain {
+    align-items: center;
+    letter-spacing: 0.8px;
+    margin-top: 50px;
+}
+.Accounts {
+    margin-left: 200px;
+}
+.Accounts input {
+    border-radius: 5px;
+    margin: 10px;
+    padding: 6px;
+    background-color: rgba(189, 189, 189, 0.272);
+    outline: none;
+    border: none;
+}
+.Accounts h3   {
+text-align: center;
+color: gray;
+}
+.Accounts .same {
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+}
+.Accounts .Test {
+    display: inline-block;
+    width: 100px;
+    height: 34px;
+}
+.agree {
+    display: block;
+}
+.RegisterBtn {
+    margin-top: 8px;
+    padding: 10px;
+    width: 260px;
+    color: white;
+background: linear-gradient(to top right, #4f46e5, #60a5fa);
+    cursor: pointer;
+    border-radius: 8px;
+    border: none;
+    font-size: 20px;
+    margin-left: 10px;
+}
+.RegisterBtn :hover {
+    transition: .1s ease-in-out;
+    
+}
+footer {
+    position: absolute;
+    bottom: 2%;
+    text-align: center;
+   left: 55%; 
+}
+h1 {
+    font-size: 27px;
+}
+.newfoot { 
+    margin-left: 30px;
+}

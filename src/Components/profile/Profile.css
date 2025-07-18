@@ -1,0 +1,154 @@
+.profile-container {
+   font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+   /* min-height:max-content;*/ 
+   min-height: 280vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.profile-btn img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #4f46e5;
+  transition: transform 0.3s ease;
+}
+
+.profile-btn img:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.user-information {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 0.2rem;
+  cursor: pointer;
+}
+
+.profile-edit-button {
+  background-color: transparent;
+  border: none;
+  color: #4f46e5;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+}
+
+.edit-name-input {
+  font-size: 1.5rem;
+  padding: 0.4rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+.profile-header {
+    width: 100%;
+    height: 150px;
+    background: linear-gradient(90deg, #4f46e5, #5296ea, #60a5fa);
+  }
+.profile-stats {
+  margin-top: 1rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.profile-stats p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #374151;
+}
+
+.profile-tabs {
+  margin-top: 2rem;
+}
+
+.tabs-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tab {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  background: #e5e7eb;
+  text-decoration: none;
+  color: #1f2937;
+  transition: all 0.2s ease-in-out;
+}
+
+.tab:hover {
+  background: #d1d5db;
+}
+
+.active-tab {
+  background: #5296ea;
+  color: white;
+  font-weight: bold;
+}
+
+.content-section {
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+}
+
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.6rem 1rem;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.specialization-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.modal-content h2 {
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+}
+
+.modal-content button {
+  background-color: #4f46e5;
+  color: white;
+  margin: 0.4rem;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}

@@ -1,0 +1,1168 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import HeaderApp from '../HeaderApp/HeaderApp';
+import { IoSend } from "react-icons/io5";
+import { FaCode, FaImages, FaArrowUp, FaArrowDown, FaFilter } from "react-icons/fa";
+
+function Home() {
+  const [newPostContent, setNewPostContent] = useState('');
+  const [title, setTitle] = useState('');
+  const [posts, setPosts] = useState([]);
+  const [allPosts, setAllPosts] = useState([]);
+  const [commentInputs, setCommentInputs] = useState({});
+  const [userCommunities, setUserCommunities] = useState([1, 2, 3]); // User's joined communities
+  const [postingCommunity, setPostingCommunity] = useState(1); // Default to first community
+  const [activeCommunity, setActiveCommunity] = useState(null); // null = show all
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem('token');
+
+  // Fetch posts from all joined communities
+  const fetchPosts = async () => {
+    setLoading(true);
+    try {
+      // Fetch posts from all communities in parallel
+      const communityRequests = userCommunities.map(communityId => 
+        axios.get(`http://127.0.0.1:8000/api/student/post/get?community_id=${communityId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      );
+
+      const responses = await Promise.all(communityRequests);
+      
+      // Combine all posts from all communities
+      let combinedPosts = [];
+      responses.forEach((response, index) => {
+        const communityId = userCommunities[index];
+        const processPosts = (posts) => {
+          return posts.map(post => ({
+            ...post,
+            community_id: communityId // Ensure each post has community_id
+          }));
+        };
+
+        if (response.data.post) combinedPosts.push(...processPosts(response.data.post));
+        if (response.data.user_post) combinedPosts.push(...processPosts(response.data.user_post));
+      });
+
+      // Remove duplicates and sort by date (newest first)
+      const uniquePosts = combinedPosts.filter((post, index, self) => 
+        index === self.findIndex((p) => p.id === post.id)
+      ).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      
+      setAllPosts(uniquePosts);
+      setPosts(activeCommunity 
+        ? uniquePosts.filter(post => post.community_id === activeCommunity)
+        : uniquePosts
+      );
+      
+      // Initialize comment inputs
+      const inputs = {};
+      uniquePosts.forEach(post => {
+        inputs[post.id] = '';
+      });
+      setCommentInputs(inputs);
+    } catch (err) {
+      console.error("Failed to fetch posts", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  // Update filtered posts when active community changes
+  useEffect(() => {
+    if (allPosts.length) {
+      setPosts(activeCommunity 
+        ? allPosts.filter(post => post.community_id === activeCommunity)
+        : allPosts
+      );
+    }
+  }, [activeCommunity, allPosts]);
+
+  const handlePost = async () => {
+    if (!title || !newPostContent) return alert("Please fill in both title and content");
+
+    try {
+      await axios.post('http://127.0.0.1:8000/api/student/post/Add', {
+        title: title,
+        content: newPostContent,
+        typePost: "Ask",
+        community_id: postingCommunity,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setTitle('');
+      setNewPostContent('');
+      fetchPosts(); // Refresh posts
+    } catch (err) {
+      console.error("Failed to publish post", err);
+      alert("Error: Couldn't add post.");
+    }
+  };
+
+  const handleComment = async (postId) => {
+    if (!commentInputs[postId]?.trim()) return alert("Please write a comment");
+
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/student/AddComment', {
+        post_id: postId,
+        content: commentInputs[postId],
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setPosts(prevPosts => {
+        return prevPosts.map(post => {
+          if (post.id === postId) {
+            const newComment = {
+              ...response.data.comment,
+              user: response.data.user
+            };
+            return {
+              ...post,
+              comments: [...(post.comments || []), newComment]
+            };
+          }
+          return post;
+        });
+      });
+
+      setCommentInputs({...commentInputs, [postId]: ''});
+    } catch (err) {
+      console.error("Failed to add comment", err);
+      alert("Error: Couldn't add comment.");
+    }
+  };
+
+  const handleVote = async (postId, voteType) => {
+    try {
+      const response = await axios.put(
+        'http://127.0.0.1:8000/api/student/VotePost', 
+        {
+          vote: voteType,
+          postid: postId
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.id === postId 
+            ? { 
+                ...post, 
+                positiveVotes: response.data.votes.positive,
+                negativeVotes: response.data.votes.negative 
+              }
+            : post
+        )
+      );
+    } catch (err) {
+      console.error("Failed to vote", err);
+      alert("Error: Couldn't process your vote.");
+    }
+  };
+
+  const displayUserName = (user) => {
+    if (!user) return 'Anonymous';
+    if (user.first_name && user.last_name) {
+      return `${user.first_name} ${user.last_name}`;
+    }
+    return user.name || `User#${user.id}`;
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center">
+      <HeaderApp />
+      
+      <div className="w-full max-w-2xl px-4 py-8 flex flex-col items-center gap-8">
+        {/* Community Filter Bar */}
+        <div className="w-full bg-white rounded-xl shadow-md p-4 flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <FaFilter className="text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">Filter by community:</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setActiveCommunity(null)}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                activeCommunity === null 
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              All Communities
+            </button>
+            {userCommunities.map(communityId => (
+              <button
+                key={communityId}
+                onClick={() => setActiveCommunity(communityId)}
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  activeCommunity === communityId
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Community {communityId}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Create Post Card */}
+        <div className="w-full bg-white rounded-xl shadow-md p-6">
+          <div className="flex items-start gap-4">
+            <img 
+              src="https://randomuser.me/api/portraits/women/1.jpg" 
+              alt="Profile" 
+              className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
+            />
+            <div className="flex-1 flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <select
+                  value={postingCommunity}
+                  onChange={(e) => setPostingCommunity(Number(e.target.value))}
+                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                >
+                  {userCommunities.map(id => (
+                    <option key={id} value={id}>Community {id}</option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  placeholder="Post title..."
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg font-medium"
+                />
+              </div>
+              <textarea
+                placeholder="What's on your mind?"
+                value={newPostContent}
+                onChange={(e) => setNewPostContent(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none min-h-[100px]"
+                rows="3"
+              />
+              <div className="flex justify-between items-center">
+                <div className="flex gap-4 text-gray-500">
+                  <button className="flex items-center gap-2 hover:text-blue-500">
+                    <FaCode />
+                    <span className="text-sm font-medium">Code</span>
+                  </button>
+                  <button className="flex items-center gap-2 hover:text-blue-500">
+                    <FaImages />
+                    <span className="text-sm font-medium">Images</span>
+                  </button>
+                </div>
+                <button 
+                  onClick={handlePost}
+                  className="px-5 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+                >
+                  <span className="font-medium">Post</span>
+                  <IoSend />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Posts Feed */}
+        {loading ? (
+          <div className="w-full bg-white rounded-xl shadow-md p-8 text-center">
+            <p className="text-gray-500">Loading posts...</p>
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="w-full bg-white rounded-xl shadow-md p-8 text-center">
+            <p className="text-gray-500">
+              {activeCommunity 
+                ? `No posts in Community ${activeCommunity} yet. Be the first to post!`
+                : "No posts available yet in your communities."}
+            </p>
+          </div>
+        ) : (
+          <div className="w-full flex flex-col gap-8">
+            {posts.map((post) => (
+              <div key={post.id} className="w-full bg-white rounded-xl shadow-md overflow-hidden">
+                {/* Post Header with Voting */}
+                <div className="p-6 border-b border-gray-100 flex justify-between">
+                  <div className="flex items-center gap-4">
+                    <img 
+                      src="https://randomuser.me/api/portraits/women/1.jpg" 
+                      alt="Profile" 
+                      className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-800">
+                        {displayUserName(post.user)}
+                        <span className="ml-2 text-xs font-normal text-gray-500">
+                          (Community {post.community_id})
+                        </span>
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {post.created_at ? new Date(post.created_at).toLocaleString() : 'No date'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Voting UI */}
+                  <div className="flex flex-col items-center gap-1">
+                    <button 
+                      onClick={() => handleVote(post.id, 'up')}
+                      className="p-1 text-gray-500 hover:text-green-500 focus:outline-none"
+                    >
+                      <FaArrowUp className="text-lg" />
+                    </button>
+                    <span className="text-xs font-medium text-gray-600">
+                      {post.positiveVotes || 0}
+                    </span>
+                    <button 
+                      onClick={() => handleVote(post.id, 'down')}
+                      className="p-1 text-gray-500 hover:text-red-500 focus:outline-none"
+                    >
+                      <FaArrowDown className="text-lg" />
+                    </button>
+                    <span className="text-xs font-medium text-gray-600">
+                      {post.negativeVotes || 0}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Post Content */}
+                <div className="p-6">
+                  <h3 className="font-bold text-xl text-gray-900 mb-2">{post.title}</h3>
+                  <p className="text-gray-700 whitespace-pre-line">{post.content}</p>
+                </div>
+
+                {/* Comments Section */}
+                <div className="bg-gray-50 p-6 border-t border-gray-100">
+                  <div className="flex flex-col gap-4">
+                    {post.comments?.map(comment => (
+                      <div key={comment.id} className="flex gap-3">
+                        <img 
+                          src="https://randomuser.me/api/portraits/women/1.jpg" 
+                          alt="Profile" 
+                          className="w-10 h-10 rounded-full object-cover mt-1 flex-shrink-0"
+                        />
+                        <div className="bg-white p-3 rounded-lg shadow-sm flex-1">
+                          <p className="font-medium text-sm text-gray-800">
+                            {displayUserName(comment.user)}
+                          </p>
+                          <p className="text-gray-700 mt-1">{comment.content}</p>
+                          <p className="text-xs text-gray-400 mt-2">
+                            {comment.created_at ? new Date(comment.created_at).toLocaleTimeString() : 'No date'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Comment Input */}
+                    <div className="flex items-center gap-2 mt-4">
+                      <img 
+                        src="https://randomuser.me/api/portraits/women/1.jpg" 
+                        alt="Profile" 
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                      />
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          placeholder="Write a comment..."
+                          value={commentInputs[post.id] || ''}
+                          onChange={(e) => setCommentInputs({
+                            ...commentInputs,
+                            [post.id]: e.target.value
+                          })}
+                          className="w-full pl-4 pr-12 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                        />
+                        <button 
+                          onClick={() => handleComment(post.id)}
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+                        >
+                          <IoSend size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default Home;
+
+
+
+
+    div className="w-full max-w-2xl px-4 py-8 flex flex-col items-center gap-8">
+        {/* Community Filter Bar */}
+        <div className="w-full bg-white rounded-xl shadow-md p-4 flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <FaFilter className="text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">Filter by community:</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setActiveCommunity(null)}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                activeCommunity === null 
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              All Communities
+            </button>
+            {userCommunities.map(communityId => (
+              <button
+                key={communityId}
+                onClick={() => setActiveCommunity(communityId)}
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  activeCommunity === communityId
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Community {communityId}
+              </button>
+            ))}
+          </div>
+        </div>
+
+
+{loading ? (
+          <div className="w-full bg-white rounded-xl shadow-md p-8 text-center">
+            <p className="text-gray-500">Loading posts...</p>
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="w-full bg-white rounded-xl shadow-md p-8 text-center">
+            <p className="text-gray-500">
+              {activeCommunity 
+                ? `No posts in Community ${activeCommunity} yet. Be the first to post!`
+                : "No posts available yet in your communities."}
+            </p>
+          </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+for last code 
+  {/* Create Post Card */}
+        <div className="w-full bg-white rounded-xl shadow-md p-6"
+        style={{width :'108%' ,
+          marginLeft:'63px' , 
+          padding :'15px'
+
+        }}
+        >
+          <div className="flex items-start gap-4"
+          >
+            <img 
+              src="https://randomuser.me/api/portraits/women/1.jpg" 
+              alt="Profile" 
+              className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
+            />
+            <div className="flex-1 flex flex-col gap-4"
+
+            >
+              <input
+                type="text"
+                placeholder="Post title..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg font-medium"
+              />
+              <textarea
+                placeholder="What's on your mind?"
+                value={newPostContent}
+                onChange={(e) => setNewPostContent(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none min-h-[100px]"
+                rows="3"
+              />
+              <div className="flex justify-end items-center ">
+                {/*
+                <div className="flex gap-4 text-gray-500">
+                  <button className="flex items-center gap-2 hover:text-blue-500">
+                    <FaCode />
+                    <span className="text-sm font-medium">Code</span>
+                  </button>
+                  <button className="flex items-center gap-2 hover:text-blue-500">
+                    <FaImages />
+                    <span className="text-sm font-medium">Images</span>
+                  </button>
+                </div>
+                */}
+                
+                <button 
+                  onClick={handlePost}
+                  className="px-5 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+                >
+                  <span className="font-medium"
+                  style={{cursor:'pointer'}}
+                  >Post</span>
+                  <IoSend />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+          {/* Posts Feed */}
+        {loading ? (
+          <div className="w-full bg-white rounded-xl shadow-md p-8 text-center">
+            <p className="text-gray-500">Loading posts...</p>
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="w-full bg-white rounded-xl shadow-md p-8 text-center">
+            <p className="text-gray-500">
+              {activeCommunity 
+                ? `No posts in Community ${activeCommunity} yet. Be the first to post!`
+                : "No posts available yet in your communities."}
+            </p>
+          </div>
+        ) : (
+        
+        <div className="w-full flex flex-col gap-8"
+      //  style={{width :'150%',
+      //  }}
+
+        >
+          {posts.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-md p-8 text-center"
+            
+            >
+              <p className="text-gray-500 text-lg">No posts available yet. Be the first to post!</p>
+            </div>
+          ) : (
+            posts.map((post) => (
+              <div key={post.id} className="w-full bg-white rounded-xl shadow-md overflow-hidden"
+              style={{padding:'30px',
+                paddingLeft:'30px',
+                width :'53vw',
+                //COntainer handling post//backgroundColor :'#295DC52B'
+              }}
+              >
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  {/* Posts Feed */}
+
+        
+        <div className="w-full flex flex-col gap-8"
+      //  style={{width :'150%',
+      //  }}
+
+        >
+          {posts.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-md p-8 text-center"
+            
+            >
+              <p className="text-gray-500 text-lg">No posts available yet. Be the first to post!</p>
+            </div>
+          ) : (
+            posts.map((post) => (
+              <div key={post.id} className="w-full bg-white rounded-xl shadow-md overflow-hidden"
+              style={{padding:'30px',
+                paddingLeft:'30px',
+                width :'53vw',
+                //COntainer handling post//backgroundColor :'#295DC52B'
+              }}
+              >
+                {/* Post Header with Voting */}
+                <div className="p-6 border-b border-gray-100 flex justify-between">
+                  <div className="flex items-center gap-4"
+                  >
+                    <img 
+                      src="https://randomuser.me/api/portraits/women/1.jpg" 
+                      alt="Profile" 
+                      className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-800">
+                        {displayUserName(post.user)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {post.created_at ? new Date(post.created_at).toLocaleString() : 'No date'}
+                      </p>
+                    </div>
+                  </div>
+                  
+               {/* Voting UI */}
+<div className="flex flex-col items-center gap-1">
+  <button 
+    onClick={() => handleVote(post.id, 'up')}
+    className="p-1 text-gray-500 hover:text-green-500 focus:outline-none"
+  >
+    <LuArrowBigUp 
+      className="text-lg"
+      style={{
+        fontSize: '26px',
+        cursor: 'pointer'
+      }}
+    />
+  </button>
+  
+  <span className="text-xs font-medium text-gray-600">
+    {(post.positiveVotes || 0) - (post.negativeVotes || 0)}
+  </span>
+  
+  <button 
+    onClick={() => handleVote(post.id, 'down')}
+    className="p-1 text-gray-500 hover:text-red-500 focus:outline-none"
+  >
+    <LuArrowBigDown 
+      className="text-lg"
+      style={{
+        fontSize: '26px',
+        cursor: 'pointer'
+      }}
+    />
+  </button>
+      </div>
+      </div>
+
+
+
+
+
+
+
+  <div className="w-full bg-white rounded-xl shadow-md p-4 flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setActiveCommunity(null)}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                activeCommunity === null 
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              All Communities
+            </button>
+            {userCommunities.map(communityId => (
+              <button
+                key={communityId}
+                onClick={() => setActiveCommunity(communityId)}
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  activeCommunity === communityId
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Community {communityId}
+              </button>
+
+
+
+
+
+
+
+         {/*Post  Content*/}
+                <div className="p-6">
+                  <h3 className="font-bold text-xl text-gray-900 mb-2" style={{ width:'50vw', borderRadius:'10px', padding:'12px', direction:'rtl' }}>
+                    {post.title}
+                  </h3>
+                  <p className="text-gray-700 whitespace-pre-line" style={{ width:'50vw', paddingLeft:'22px', direction:'rtl' }}>
+                    {post.content}
+                  </p>
+                </div>
+                  {/* Comments Section */}
+                <div className="bg-gray-50 p-6 border-t border-gray-100" style={{marginTop:'25px', borderRadius:'11px'}}>
+                  <div className="flex flex-col gap-4">
+                    {post.comments?.map(comment => (
+                      <div key={comment.id} className="flex gap-3">
+                        <img 
+                          src="https://randomuser.me/api/portraits/women/1.jpg" 
+                          alt="Profile" 
+                          className="w-10 h-10 rounded-full object-cover mt-1 flex-shrink-0"
+                        />
+                        <div className="bg-white p-3 rounded-lg shadow-sm flex-1">
+                          <p className="font-medium text-sm text-gray-800">
+                            {displayUserName(comment.user)}
+                          </p>
+                          <p className="text-gray-700 mt-1 text-right">{comment.content}</p>
+                          <p className="text-xs text-gray-400 mt-2">
+                            {comment.created_at ? new Date(comment.created_at).toLocaleTimeString() : 'No date'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+
+
+
+
+
+
+/***/ with backend roadmap
+
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import HeaderApp from "../HeaderApp/HeaderApp";
+import { gsap } from "gsap";
+import "./RoadMap.css";
+
+// The static charts for the Outside roadmap, keyed by major and type.
+const getRandomChart = (major, type) => {
+  const charts = {
+    Backend: {
+      Outside: [
+        `graph TD
+          A[Backend RoadMap v1]
+          A -.-> B[Node.js]
+          A -.-> C[Express.js]
+          C -.-> D[MongoDB]
+          A -.-> E[REST API]
+          classDef customStyle fill:none,stroke:#60a5fa,stroke-width:2px,color:#60a5fa;
+          classDef blueStyle fill:none,stroke:#60a5fa,stroke-width:3px,color:#4f46e5,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[Backend RoadMap v2]
+          A -.-> B[PHP & Laravel]
+          A -.-> C[MySQL]
+          C -.-> D[Database Design]
+          A -.-> E[OOP]
+          E -.-> F[Programming Fundamentals]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E,F customStyle;
+          class A blueStyle;`
+      ],
+      Inside: [
+        `graph TD
+          A[College Backend Curriculum]
+          A -.-> B[Algorithms & Data Structures]
+          B -.-> C[Introduction to Node.js]
+          C -.-> D[Database Systems]
+          A -.-> E[Theory of Computation]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[Backend Studies]
+          A -.-> B[Computer Networks]
+          B -.-> C[Systems Programming]
+          A -.-> D[Software Engineering]
+          D -.-> E[Project Management]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`
+      ]
+    },
+    "Front-end": {
+      Outside: [
+        `graph TD
+          A[Front-end RoadMap v1]
+          A -.-> B[HTML + CSS]
+          B -.-> C[JavaScript]
+          A -.-> D[React]
+          D -.-> E[Next.js]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[Front-end RoadMap v2]
+          A -.-> B[HTML/CSS]
+          A -.-> C[JavaScript]
+          A -.-> D[TypeScript]
+          C -.-> E[Vue.js]
+          A -.-> F[UI/UX Principles]
+          F -.-> G[Figma]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E,F,G customStyle;
+          class A blueStyle;`
+      ],
+      Inside: [
+        `graph TD
+          A[College Front-end Curriculum]
+          A -.-> B[Web Design Fundamentals]
+          B -.-> C[HTML + CSS]
+          C -.-> D[JavaScript Basics]
+          D -.-> E[React Fundamentals]
+          A -.-> F[UX/UI Design Principles]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E,F customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[Front-end Studies]
+          A -.-> B[Digital Media & Design]
+          B -.-> C[Graphic Design]
+          A -.-> D[Interactive Programming]
+          D -.-> E[JavaScript & React]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`
+      ]
+    },
+    Flutter: {
+      Outside: [
+        `graph TD
+          A[Flutter RoadMap v1]
+          A -.-> B[Dart Basics]
+          B -.-> C[Widgets]
+          C -.-> D[State Management]
+          D -.-> E[Testing]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[Flutter RoadMap v2]
+          A -.-> B[Flutter Installation]
+          A -.-> C[Material Widgets]
+          C -.-> D[Navigation]
+          A -.-> E[Animations]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`
+      ],
+      Inside: [
+        `graph TD
+          A[College Flutter Curriculum]
+          A -.-> B[Introduction to Dart]
+          B -.-> C[UI/UX Design in Flutter]
+          C -.-> D[Advanced State Management]
+          A -.-> E[Capstone Project]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[Flutter Studies]
+          A -.-> B[Mobile App Design]
+          B -.-> C[Responsive Layouts]
+          A -.-> D[Integration with Firebase]
+          D -.-> E[Deployment Strategies]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`
+      ]
+    },
+    AI: {
+      Outside: [
+        `graph TD
+          A[AI RoadMap v1]
+          A -.-> B[Python]
+          B -.-> C[Numpy + Pandas]
+          C -.-> D[Machine Learning]
+          D -.-> E[Deep Learning]
+          A -.-> F[Data Science]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E,F customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[AI RoadMap v2]
+          A -.-> B[Python Basics]
+          B -.-> C[Scikit-learn]
+          C -.-> D[TensorFlow]
+          D -.-> E[NLP]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`
+      ],
+      Inside: [
+        `graph TD
+          A[College AI Program]
+          A -.-> B[Mathematical Foundations]
+          B -.-> C[Python for Data Science]
+          C -.-> D[Machine Learning Basics]
+          D -.-> E[Deep Learning Fundamentals]
+          A -.-> F[Capstone Project]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E,F customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[AI Studies]
+          A -.-> B[Statistics & Probability]
+          B -.-> C[Data Analysis]
+          A -.-> D[Introduction to Neural Networks]
+          D -.-> E[Computer Vision]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`
+      ]
+    }
+  };
+
+  const majorCharts = charts[major] || charts["Backend"];
+  const typeCharts = majorCharts[type] || majorCharts["Outside"];
+  const randomIndex = Math.floor(Math.random() * typeCharts.length);
+  return typeCharts[randomIndex];
+};
+
+const RoadMap = () => {
+  const [major, setMajor] = useState("Backend");
+  const [type, setType] = useState("Outside");
+  const [chartDefinition, setChartDefinition] = useState(getRandomChart("Backend", "Outside"));
+  const [svg, setSvg] = useState("");
+  const [insideSubjects, setInsideSubjects] = useState([]);
+  const [insideLoading, setInsideLoading] = useState(false);
+  const [insideError, setInsideError] = useState(null);
+
+  const references = [
+    {
+      title: "Introduction to Programming",
+      href: "https://www.youtube.com/watch?v=zOjov-2OZ0E"
+    },
+    {
+      title: "Database 1",
+      href: "https://www.youtube.com/watch?v=wR0jg0eQsZA"
+    },
+    {
+      title: "Object-Oriented Programming (OOP)",
+      href: "https://www.youtube.com/watch?v=pTB0EiLXUC8"
+    },
+    {
+      title: "HTML & CSS",
+      href: "https://www.youtube.com/watch?v=G3e-cpL7ofc"
+    },
+    {
+      title: "JavaScript Crash Course",
+      href: "https://www.youtube.com/watch?v=hdI2bqOjy3c"
+    }
+  ];
+
+  // This helper builds a mermaid chart definition from the fetched subjects.
+  const generateInsideChartDefinition = (subjects) => {
+    let chartDef = "graph TD\n";
+    subjects.forEach((subject) => {
+      const subjectNode = `S${subject.id}[${subject.name}]`;
+      chartDef += `${subjectNode}\n`;
+      if (subject.prerequisites && subject.prerequisites.length > 0) {
+        subject.prerequisites.forEach((prereq) => {
+          const prereqNode = `S${prereq.id}[${prereq.name}]`;
+          chartDef += `${prereqNode} --> ${subjectNode}\n`;
+        });
+      }
+    });
+    return chartDef;
+  };
+
+  // Fetch data from your API endpoint when Inside is selected.
+  const fetchInsideSubjects = () => {
+    setInsideLoading(true);
+    axios
+      .get("http://localhost:8000/api/students/subjects-with-one-prerequisite")
+      .then((response) => {
+        const data = response.data;
+        let subjectsArray = [];
+        if (Array.isArray(data)) {
+          subjectsArray = data;
+        } else if (data.subjects && Array.isArray(data.subjects)) {
+          subjectsArray = data.subjects;
+        } else {
+          setInsideError("Unexpected data format.");
+          setInsideLoading(false);
+          return;
+        }
+        setInsideSubjects(subjectsArray);
+        const newChartDef = generateInsideChartDefinition(subjectsArray);
+        setChartDefinition(newChartDef);
+        setInsideLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching subjects:", err);
+        setInsideError("Failed to fetch subjects");
+        setInsideLoading(false);
+      });
+  };
+
+  // Whenever 'type' or 'major' changes, update the chartDefinition.
+  useEffect(() => {
+    if (type === "Inside") {
+      fetchInsideSubjects();
+    } else {
+      setChartDefinition(getRandomChart(major, type));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type, major]);
+
+  // Render the Mermaid diagram whenever chartDefinition changes.
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof document === "undefined") return;
+    const renderMermaid = async () => {
+      try {
+        const mermaidModule = await import("mermaid");
+        const mermaid = mermaidModule.default || mermaidModule;
+        mermaid.initialize({ startOnLoad: false, theme: "default" });
+        const { svg: generatedSvg } = await mermaid.render("mermaidGraph", chartDefinition);
+        setSvg(generatedSvg);
+        setTimeout(() => {
+          const container = document.querySelector(".mermaid-container");
+          if (container) {
+            gsap.from(container, { duration: 0.6, opacity: 0, y: 30, ease: "power2.out" });
+            const nodes = container.querySelectorAll(".node");
+            gsap.from(nodes, { duration: 0.4, opacity: 0, scale: 0.8, stagger: 0.1, ease: "back.out(1.7)" });
+            nodes.forEach((node) => {
+              node.addEventListener("click", () => {
+                gsap.fromTo(
+                  node,
+                  { scale: 1 },
+                  { scale: 1.2, duration: 0.2, yoyo: true, repeat: 1, ease: "power1.inOut" }
+                );
+              });
+            });
+          }
+        }, 300);
+      } catch (error) {
+        console.error("Error rendering Mermaid diagram:", error);
+      }
+    };
+    renderMermaid();
+  }, [chartDefinition]);
+
+  // Extra GSAP timeline for transitioning between diagram updates.
+  const handleGenerate = () => {
+    const container = document.querySelector(".mermaid-container");
+    if (container) {
+      gsap.to(container, {
+        duration: 0.5,
+        opacity: 0,
+        x: -50,
+        ease: "power2.in",
+        onComplete: () => {
+          if (type === "Inside") {
+            fetchInsideSubjects();
+          } else {
+            setChartDefinition(getRandomChart(major, type));
+          }
+        }
+      });
+    } else {
+      if (type === "Inside") {
+        fetchInsideSubjects();
+      } else {
+        setChartDefinition(getRandomChart(major, type));
+      }
+    }
+  };
+
+  const handleTypeChange = (e) => {
+    setType(e.target.value);
+  };
+
+  const handleMajorChange = (e) => {
+    setMajor(e.target.value);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center">
+      <HeaderApp />
+
+      <div className="TestRoad">
+        <div className="ContentRoad">
+          <h1 className="TypeRoadMap">Type:</h1>
+
+          <div className="FirstMajor">
+            <select name="type" value={type} onChange={handleTypeChange} required>
+              <option value="Outside">Outside</option>
+              <option value="Inside">Inside</option>
+            </select>
+          </div>
+
+          {/* Only show the "Major" select when the type is Outside */}
+          {type === "Outside" && (
+            <div className="SecondMajor" style={{ marginBottom: "25px" }}>
+              <select name="Major" value={major} onChange={handleMajorChange} required>
+                <option value="Backend">Backend</option>
+                <option value="Front-end">Front-end</option>
+                <option value="Flutter">Flutter</option>
+                <option value="AI">AI</option>
+              </select>
+            </div>
+          )}
+
+          <div className="GenerateButton" style={{ marginTop: "10px" }}>
+            <button className="GenerateRoad" onClick={handleGenerate}>
+              Generate a new RoadMap
+            </button>
+          </div>
+
+          <div className="References">
+            <h3 style={{ marginBottom: "15px" }}>References:</h3>
+            <ul>
+              {references.map((ref, index) => (
+                <li key={index}>
+                  <a href={ref.href} target="_blank" rel="noreferrer">
+                    {ref.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Display loading or error messages for Inside mode */}
+        {type === "Inside" && insideLoading && <p>Loading subjects...</p>}
+        {type === "Inside" && insideError && <p style={{ color: "red" }}>{insideError}</p>}
+
+        <div
+          key={chartDefinition}
+          className="mermaid-container"
+          style={{
+            marginLeft: "150px",
+            width: "50vw",
+            height: "50vh",
+            transform: "scale(1.2)",
+            transformOrigin: "top left"
+          }}
+          dangerouslySetInnerHTML={{ __html: svg }}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default RoadMap;

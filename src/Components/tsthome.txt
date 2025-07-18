@@ -1,0 +1,2003 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import HeaderApp from '../HeaderApp/HeaderApp';
+import { IoSend } from "react-icons/io5";
+import { FaCode, FaImages} from "react-icons/fa";
+import { LuArrowBigUp } from "react-icons/lu";
+import { LuArrowBigDown } from "react-icons/lu";
+
+function Home() {
+  const [newPostContent, setNewPostContent] = useState('');
+  const [title, setTitle] = useState('');
+  const [posts, setPosts] = useState([]);
+  const [commentInputs, setCommentInputs] = useState({});
+    const [userCommunities, setUserCommunities] = useState([1, 2, 3]); // User's joined communities
+    const [postingCommunity, setPostingCommunity] = useState(1); // Default to first community
+    const [activeCommunity, setActiveCommunity] = useState(null); // null = show all
+  const token = localStorage.getItem('token');
+  const communityId = 1;
+
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:8000/api/student/post/get`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      const allPosts = [...response.data.post, ...response.data.user_post]
+        .filter((post, index, self) => 
+          index === self.findIndex((p) => p.id === post.id)
+        );
+      
+      allPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      
+      setPosts(allPosts);
+      
+      const inputs = {};
+      allPosts.forEach(post => {
+        inputs[post.id] = '';
+      });
+      setCommentInputs(inputs);
+    } catch (err) {
+      console.error("Failed to fetch posts", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const handlePost = async () => {
+    if (!title || !newPostContent) return alert("Please fill in both title and content");
+
+    try {
+      await axios.post('http://127.0.0.1:8000/api/student/post/Add', {
+        title: title,
+        content: newPostContent,
+        typePost: "Ask",
+        community_id: communityId,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setTitle('');
+      setNewPostContent('');
+      fetchPosts();
+    } catch (err) {
+      console.error("Failed to publish post", err);
+      alert("Error: Couldn't add post.");
+    }
+  };
+
+  const handleComment = async (postId) => {
+    if (!commentInputs[postId]?.trim()) return alert("Please write a comment");
+
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/student/AddComment', {
+        post_id: postId,
+        content: commentInputs[postId],
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setPosts(prevPosts => {
+        return prevPosts.map(post => {
+          if (post.id === postId) {
+            const newComment = {
+              ...response.data.comment,
+              user: response.data.user
+            };
+            return {
+              ...post,
+              comments: [...(post.comments || []), newComment]
+            };
+          }
+          return post;
+        });
+      });
+
+      setCommentInputs({...commentInputs, [postId]: ''});
+    } catch (err) {
+      console.error("Failed to add comment", err);
+      alert("Error: Couldn't add comment.");
+    }
+  };
+
+  const handleVote = async (postId, voteType) => {
+    try {
+      const response = await axios.put(
+        'http://127.0.0.1:8000/api/student/VotePost', 
+        {
+          vote: voteType,
+          postid: postId
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.id === postId 
+            ? { 
+                ...post, 
+                positiveVotes: response.data.votes.positive,
+                negativeVotes: response.data.votes.negative 
+              }
+            : post
+        )
+      );
+    } catch (err) {
+      console.error("Failed to vote", err);
+      alert("Error: Couldn't process your vote.");
+    }
+  };
+
+  const displayUserName = (user) => {
+    if (!user) return 'Anonymous';
+    if (user.first_name && user.last_name) {
+      return `${user.first_name} ${user.last_name}`;
+    }
+    return user.name || `User#${user.id}`;
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center">
+      <HeaderApp />
+      <div className="w-full max-w-2xl px-4 py-8 flex flex-col items-center gap-8">
+        
+       {/* Create Post Card */}
+              <div className="w-full bg-white rounded-xl shadow-md p-6"
+              style={{width:'53vw',
+                padding :'15px',
+                marginLeft:'57px'
+              }}  
+              >
+                <div className="flex items-start gap-4"
+                          
+                >
+                  <img 
+                    src="https://randomuser.me/api/portraits/women/1.jpg" 
+                    alt="Profile" 
+                    className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
+                  />
+                  <div className="flex-1 flex flex-col gap-4">
+                    <div className="flex items-center gap-3">
+                      <select
+                        value={postingCommunity}
+                        onChange={(e) => setPostingCommunity(Number(e.target.value))}
+                        className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      >
+                        {userCommunities.map(id => (
+                          <option key={id} value={id}>Community {id}</option>
+                        ))}
+                      </select>
+                      <input
+                        type="text"
+                        placeholder="Post title..."
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg font-medium"
+                      />
+                    </div>
+                    <textarea
+                      placeholder="What's on your mind?"
+                      value={newPostContent}
+                      onChange={(e) => setNewPostContent(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none min-h-[100px]"
+                      rows="3"
+                    />
+                    <div className="flex justify-between items-center">
+                      <div className="flex gap-4 text-gray-500">
+                        <button className="flex items-center gap-2 hover:text-blue-500">
+                          <FaCode />
+                          <span className="text-sm font-medium">Code</span>
+                        </button>
+                        <button className="flex items-center gap-2 hover:text-blue-500">
+                          <FaImages />
+                          <span className="text-sm font-medium">Images</span>
+                        </button>
+                      </div>
+                      <button 
+                        onClick={handlePost}
+                        className="px-5 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+                      >
+                        <span className="font-medium">Post</span>
+                        <IoSend />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+      
+
+        {/* Posts Feed */}
+        
+        <div className="w-full flex flex-col gap-8"
+      //  style={{width :'150%',
+      //  }}
+
+        >
+          {posts.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-md p-8 text-center"
+            
+            >
+              <p className="text-gray-500 text-lg">No posts available yet. Be the first to post!</p>
+            </div>
+          ) : (
+            posts.map((post) => (
+              <div key={post.id} className="w-full bg-white rounded-xl shadow-md overflow-hidden"
+              style={{padding:'30px',
+                paddingLeft:'30px',
+                width :'53vw',
+                //COntainer handling post//backgroundColor :'#295DC52B'
+              }}
+              >
+                {/* Post Header with Voting */}
+                <div className="p-6 border-b border-gray-100 flex justify-between">
+                  <div className="flex items-center gap-4"
+                  >
+                    <img 
+                      src="https://randomuser.me/api/portraits/women/1.jpg" 
+                      alt="Profile" 
+                      className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-800">
+                        {displayUserName(post.user)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {post.created_at ? new Date(post.created_at).toLocaleString() : 'No date'}
+                      </p>
+                    </div>
+                  </div>
+                  
+               {/* Voting UI */}
+<div className="flex flex-col items-center gap-1">
+  <button 
+    onClick={() => handleVote(post.id, 'up')}
+    className="p-1 text-gray-500 hover:text-green-500 focus:outline-none"
+  >
+    <LuArrowBigUp 
+      className="text-lg"
+      style={{
+        fontSize: '26px',
+        cursor: 'pointer'
+      }}
+    />
+  </button>
+  
+  <span className="text-xs font-medium text-gray-600">
+    {(post.positiveVotes || 0) - (post.negativeVotes || 0)}
+  </span>
+  
+  <button 
+    onClick={() => handleVote(post.id, 'down')}
+    className="p-1 text-gray-500 hover:text-red-500 focus:outline-none"
+  >
+    <LuArrowBigDown 
+      className="text-lg"
+      style={{
+        fontSize: '26px',
+        cursor: 'pointer'
+      }}
+    />
+  </button>
+      </div>
+      </div>
+                {/* Post Content */}
+                <div className="p-6">
+                  <h3 className="font-bold text-xl text-gray-900 mb-2"
+                  style={{
+                    width:'50vw',
+                    borderRadius:'10px',
+                    padding:'12px',
+                    direction:'rtl'
+                  }}
+                  >{post.title}</h3>
+                  <p className="text-gray-700 whitespace-pre-line"
+                  style={{
+                    width:'50vw',
+                    height:'fit-Content',
+                    paddingLeft:'22px',
+                    borderRadius:'10px',
+                    direction:'rtl'
+                  }}
+                  >{post.content}</p>
+                </div>
+
+                {/* Comments Section */}
+                <div className="bg-gray-50 p-6 border-t border-gray-100" 
+                style={{marginTop:'25px',
+                 //behind Input filed// backgroundColor:'#295DC52B' ,
+                  borderRadius:'11px',
+                  //container input
+                }}
+                
+                >
+                  <div className="flex flex-col gap-4">
+                    {post.comments?.map(comment => (
+                      <div key={comment.id} className="flex gap-3"
+                      >
+                        <img 
+                          src="https://randomuser.me/api/portraits/women/1.jpg" 
+                          alt="Profile" 
+                          className="w-10 h-10 rounded-full object-cover mt-1 flex-shrink-0"
+                        />
+                        <div className="bg-white p-3 rounded-lg shadow-sm flex-1"
+                     //handling comment//style={{backgroundColor:'#295DC52B'}}
+                        
+                        >
+                          <p className="font-medium text-sm text-right-gray-800"
+                          
+                          >
+                            {displayUserName(comment.user)}
+                          </p>
+                          <p className="text-gray-700 mt-1 text-right"
+                          >{comment.content}</p>
+                          <p className="text-xs text-gray-400 mt-2">
+                            {comment.created_at ? new Date(comment.created_at).toLocaleTimeString() : 'No date'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Comment Input */}
+                    <div className="flex items-center gap-2 mt-4"
+                            style={{
+                                paddingBottom:'12px',
+
+                            }} 
+                               
+                    >
+                      <img 
+                        src="https://randomuser.me/api/portraits/women/1.jpg" 
+                        alt="Profile" 
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+
+                      />
+                      <div className="relative flex-1"
+                            >
+
+                        <input
+                          type="text"
+                          placeholder="Write a comment..."
+                          value={commentInputs[post.id] || ''}
+                          onChange={(e) => setCommentInputs({
+                            ...commentInputs,
+                            [post.id]: e.target.value
+                            
+                          })}
+                          className="w-full pl-4 pr-12 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                          style={{padding : '10px' ,
+                            marginTop :'23px',
+                            //Comment fIELD//backgroundColor:'#295DC52B' ,
+                            borderRadius:'11px',
+                            paddingLeft:'25px',
+                          }}
+                        />
+                        <button 
+                          onClick={() => handleComment(post.id)}
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2  text-white rounded-full "
+                          style={{marginRight: '25px',
+                            marginTop:'10px',
+                            fontSize:'82px',
+                            color:'blue',
+                          }}
+                        >
+                          <IoSend size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Home;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+i have this code and i want just to remove the community filter !!!!!
+and let the select instruction that the user can select which community want to post 
+the code is :
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import HeaderApp from '../HeaderApp/HeaderApp';
+import { IoSend } from "react-icons/io5";
+import { FaCode, FaImages } from "react-icons/fa";
+import { LuArrowBigUp, LuArrowBigDown } from "react-icons/lu";
+
+function Home() {
+  const [newPostContent, setNewPostContent] = useState('');
+  const [title, setTitle] = useState('');
+  const [posts, setPosts] = useState([]);
+  const [commentInputs, setCommentInputs] = useState({});
+  const [userCommunities, setUserCommunities] = useState([1, 2, 3]);
+  const [postingCommunity, setPostingCommunity] = useState(1);
+  const [activeCommunity, setActiveCommunity] = useState(null);
+  const token = localStorage.getItem('token');
+
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:8000/api/student/post/get`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      const allPosts = [...response.data.post, ...response.data.user_post]
+        .filter((post, index, self) => 
+          index === self.findIndex((p) => p.id === post.id)
+        )
+        .map(post => ({
+          ...post,
+          community_id: post.community_id || 1
+        }));
+      
+      allPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      
+      setPosts(activeCommunity 
+        ? allPosts.filter(post => post.community_id === activeCommunity)
+        : allPosts
+      );
+      
+      const inputs = {};
+      allPosts.forEach(post => {
+        inputs[post.id] = '';
+      });
+      setCommentInputs(inputs);
+    } catch (err) {
+      console.error("Failed to fetch posts", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, [activeCommunity]);
+
+  const handlePost = async () => {
+    if (!title || !newPostContent) return alert("Please fill in both title and content");
+
+    try {
+      await axios.post('http://127.0.0.1:8000/api/student/post/Add', {
+        title: title,
+        content: newPostContent,
+        typePost: "Ask",
+        community_id: postingCommunity,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setTitle('');
+      setNewPostContent('');
+      fetchPosts();
+    } catch (err) {
+      console.error("Failed to publish post", err);
+      alert("Error: Couldn't add post.");
+    }
+  };
+
+  const handleComment = async (postId) => {
+    if (!commentInputs[postId]?.trim()) return alert("Please write a comment");
+
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/student/AddComment', {
+        post_id: postId,
+        content: commentInputs[postId],
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setPosts(prevPosts => {
+        return prevPosts.map(post => {
+          if (post.id === postId) {
+            const newComment = {
+              ...response.data.comment,
+              user: response.data.user
+            };
+            return {
+              ...post,
+              comments: [...(post.comments || []), newComment]
+            };
+          }
+          return post;
+        });
+      });
+
+      setCommentInputs({...commentInputs, [postId]: ''});
+    } catch (err) {
+      console.error("Failed to add comment", err);
+      alert("Error: Couldn't add comment.");
+    }
+  };
+
+  const handleVote = async (postId, voteType) => {
+    try {
+      const response = await axios.put(
+        'http://127.0.0.1:8000/api/student/VotePost', 
+        {
+          vote: voteType,
+          postid: postId
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.id === postId 
+            ? { 
+                ...post, 
+                positiveVotes: response.data.votes.positive,
+                negativeVotes: response.data.votes.negative 
+              }
+            : post
+        )
+      );
+    } catch (err) {
+      console.error("Failed to vote", err);
+      alert("Error: Couldn't process your vote.");
+    }
+  };
+
+  const displayUserName = (user) => {
+    if (!user) return 'Anonymous';
+    if (user.first_name && user.last_name) {
+      return `${user.first_name} ${user.last_name}`;
+    }
+    return user.name || `User#${user.id}`;
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center">
+      <HeaderApp />
+      <div className="w-full max-w-2xl px-4 py-8 flex flex-col items-center gap-8">
+        {/* Community Filter */}
+        <div className="w-full bg-white rounded-xl shadow-md p-4 flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setActiveCommunity(null)}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                activeCommunity === null 
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              All Communities
+            </button>
+            {userCommunities.map(communityId => (
+              <button
+                key={communityId}
+                onClick={() => setActiveCommunity(communityId)}
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  activeCommunity === communityId
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Community {communityId}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Create Post Card */}
+        <div className="w-full bg-white rounded-xl shadow-md p-6" style={{width:'53vw', padding:'15px', marginLeft:'57px'}}>
+          <div className="flex items-start gap-4">
+            <img 
+              src="https://randomuser.me/api/portraits/women/1.jpg" 
+              alt="Profile" 
+              className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
+            />
+            <div className="flex-1 flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <select
+                  value={postingCommunity}
+                  onChange={(e) => setPostingCommunity(Number(e.target.value))}
+                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                >
+                  {userCommunities.map(id => (
+                    <option key={id} value={id}>Community {id}</option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  placeholder="Post title..."
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg font-medium"
+                />
+              </div>
+              <textarea
+                placeholder="What's on your mind?"
+                value={newPostContent}
+                onChange={(e) => setNewPostContent(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none min-h-[100px]"
+                rows="3"
+              />
+              <div className="flex justify-between items-center">
+                <div className="flex gap-4 text-gray-500">
+                  <button className="flex items-center gap-2 hover:text-blue-500">
+                    <FaCode />
+                    <span className="text-sm font-medium">Code</span>
+                  </button>
+                  <button className="flex items-center gap-2 hover:text-blue-500">
+                    <FaImages />
+                    <span className="text-sm font-medium">Images</span>
+                  </button>
+                </div>
+                <button 
+                  onClick={handlePost}
+                  className="px-5 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+                >
+                  <span className="font-medium">Post</span>
+                  <IoSend />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Posts Feed */}
+        <div className="w-full flex flex-col gap-8">
+          {posts.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-md p-8 text-center">
+              <p className="text-gray-500 text-lg">
+                {activeCommunity 
+                  ? `No posts in Community ${activeCommunity} yet. Be the first to post!`
+                  : "No posts available yet. Be the first to post!"}
+              </p>
+            </div>
+          ) : (
+            posts.map((post) => (
+              <div key={post.id} className="w-full bg-white rounded-xl shadow-md overflow-hidden" style={{padding:'30px', width:'53vw'}}>
+                {/* Post Header */}
+                <div className="p-6 border-b border-gray-100 flex justify-between">
+                  <div className="flex items-center gap-4">
+                    <img 
+                      src="https://randomuser.me/api/portraits/women/1.jpg" 
+                      alt="Profile" 
+                      className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-800">
+                        {displayUserName(post.user)}
+                        <span className="ml-2 text-xs font-normal text-gray-500">
+                          (Community {post.community_id})
+                        </span>
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {post.created_at ? new Date(post.created_at).toLocaleString() : 'No date'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Voting UI */}
+                  <div className="flex flex-col items-center gap-1">
+                    <button 
+                      onClick={() => handleVote(post.id, 'up')}
+                      className="p-1 text-gray-500 hover:text-green-500 focus:outline-none"
+                    >
+                      <LuArrowBigUp style={{ fontSize: '26px', cursor: 'pointer' }} />
+                    </button>
+                    <span className="text-xs font-medium text-gray-600">
+                      {(post.positiveVotes || 0) - (post.negativeVotes || 0)}
+                    </span>
+                    <button 
+                      onClick={() => handleVote(post.id, 'down')}
+                      className="p-1 text-gray-500 hover:text-red-500 focus:outline-none"
+                    >
+                      <LuArrowBigDown style={{ fontSize: '26px', cursor: 'pointer' }} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Post Content */}
+                <div className="p-6">
+                  <h3 className="font-bold text-xl text-gray-900 mb-2" style={{ width:'50vw', borderRadius:'10px', padding:'12px', direction:'rtl' }}>
+                    {post.title}
+                  </h3>
+                  <p className="text-gray-700 whitespace-pre-line" style={{ width:'50vw', paddingLeft:'22px', direction:'rtl' }}>
+                    {post.content}
+                  </p>
+                </div>
+
+                {/* Comments Section */}
+                <div className="bg-gray-50 p-6 border-t border-gray-100" style={{marginTop:'25px', borderRadius:'11px'}}>
+                  <div className="flex flex-col gap-4">
+                    {post.comments?.map(comment => (
+                      <div key={comment.id} className="flex gap-3">
+                        <img 
+                          src="https://randomuser.me/api/portraits/women/1.jpg" 
+                          alt="Profile" 
+                          className="w-10 h-10 rounded-full object-cover mt-1 flex-shrink-0"
+                        />
+                        <div className="bg-white p-3 rounded-lg shadow-sm flex-1">
+                          <p className="font-medium text-sm text-gray-800">
+                            {displayUserName(comment.user)}
+                          </p>
+                          <p className="text-gray-700 mt-1 text-right">{comment.content}</p>
+                          <p className="text-xs text-gray-400 mt-2">
+                            {comment.created_at ? new Date(comment.created_at).toLocaleTimeString() : 'No date'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Comment Input */}
+                    <div className="flex items-center gap-2 mt-4" style={{paddingBottom:'12px'}}>
+                      <img 
+                        src="https://randomuser.me/api/portraits/women/1.jpg" 
+                        alt="Profile" 
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                      />
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          placeholder="Write a comment..."
+                          value={commentInputs[post.id] || ''}
+                          onChange={(e) => setCommentInputs({
+                            ...commentInputs,
+                            [post.id]: e.target.value
+                          })}
+                          className="w-full pl-4 pr-12 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                          style={{padding:'10px', marginTop:'23px', borderRadius:'11px', paddingLeft:'25px'}}
+                        />
+                        <button 
+                          onClick={() => handleComment(post.id)}
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-white rounded-full"
+                          style={{marginRight:'25px', marginTop:'10px', fontSize:'82px', color:'blue'}}
+                        >
+                          <IoSend size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Home;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+THe optional 1 : posts.jsx 
+import React, { useState, useEffect } from 'react';
+import { LuArrowBigUp, LuArrowBigDown } from "react-icons/lu";
+import CommentSection from '../CommentSection/CommentSection';
+import { FaComment, FaTimes } from 'react-icons/fa';
+
+function Posts({ posts: initialPosts = [], showInput = true, onVote, addComment }) {
+  const [posts, setPosts] = useState(initialPosts);
+  const [votedPosts, setVotedPosts] = useState({});
+  const [voteErrors, setVoteErrors] = useState({});
+  const [openComments, setOpenComments] = useState({});
+  const [expandedPost, setExpandedPost] = useState(null);
+
+  // Sync local posts with prop changes
+  useEffect(() => {
+    setPosts(initialPosts);
+  }, [initialPosts]);
+
+  const handleVote = async (postId, voteType) => {
+    if (votedPosts[postId]) {
+      setVoteErrors(prev => ({ ...prev, [postId]: "You have already voted on this post." }));
+      return;
+    }
+
+    try {
+      // Optimistic UI update
+      setPosts(prevPosts => prevPosts.map(post => {
+        if (post.id === postId) {
+          return {
+            ...post,
+            positiveVotes: voteType === 'up' ? (post.positiveVotes || 0) + 1 : (post.positiveVotes || 0),
+            negativeVotes: voteType === 'down' ? (post.negativeVotes || 0) + 1 : (post.negativeVotes || 0)
+          };
+        }
+        return post;
+      }));
+
+      setVotedPosts(prev => ({ ...prev, [postId]: voteType }));
+      setVoteErrors(prev => ({ ...prev, [postId]: '' }));
+
+      await onVote(postId, voteType);
+    } catch (err) {
+      console.error("Failed to vote", err);
+      // Rollback on error
+      setPosts(prevPosts => prevPosts.map(post => {
+        if (post.id === postId) {
+          return {
+            ...post,
+            positiveVotes: voteType === 'up' ? (post.positiveVotes || 0) - 1 : (post.positiveVotes || 0),
+            negativeVotes: voteType === 'down' ? (post.negativeVotes || 0) - 1 : (post.negativeVotes || 0)
+          };
+        }
+        return post;
+      }));
+    }
+  };
+
+  const toggleComments = (postId) => {
+    if (expandedPost === postId) {
+      setExpandedPost(null);
+    } else {
+      setExpandedPost(postId);
+    }
+  };
+
+  const displayUserName = (user) => {
+    if (!user) return 'Anonymous';
+    if (user.first_name && user.last_name) {
+      return `${user.first_name} ${user.last_name}`;
+    }
+    return user.name || `User#${user.id}`;
+  };
+
+  return (
+    <div className="w-full flex flex-col gap-8">
+      {posts.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-md p-8 text-center">
+          <p className="text-gray-500 text-lg">
+            No posts available yet. Be the first to post!
+          </p>
+        </div>
+      ) : (
+        posts.map((post) => (
+          <div 
+            key={post.id} 
+            className="w-full bg-white rounded-xl shadow-md overflow-hidden" 
+            style={{
+              padding: '30px',
+              width: '53vw',
+              direction: 'rtl'
+            }}
+          >
+            <div className="p-6 border-b border-gray-100 flex justify-between">
+              <div 
+                className="flex items-center gap-4"
+                style={{ marginTop: '-55px' }}
+              >
+                <img 
+                  src="https://randomuser.me/api/portraits/women/1.jpg" 
+                  alt="Profile" 
+                  className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
+                />
+                <div>
+                  <p className="font-semibold text-gray-800">
+                    {displayUserName(post.user)}
+                    <span className="ml-2 text-xs font-normal text-gray-500">
+                      (Community {post.community_id})
+                    </span>
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {post.created_at ? new Date(post.created_at).toLocaleString() : 'No date'}
+                  </p>
+                </div>
+              </div>
+
+              <div 
+                className="flex flex-col items-center gap-1" 
+                style={{ marginBottom: '33px' }}
+              >
+                <button
+                  onClick={() => handleVote(post.id, 'up')}
+                  className={`p-1 ${votedPosts[post.id] === 'up' ? 'text-green-500' : 'text-gray-500 hover:text-green-500'}`}
+                >
+                  <LuArrowBigUp style={{ fontSize: '32px', cursor: 'pointer' }} />
+                </button>
+                <span className="text-xs font-medium text-gray-600">
+                  {(post.positiveVotes || 0) - (post.negativeVotes || 0)}
+                </span>
+                <button
+                  onClick={() => handleVote(post.id, 'down')}
+                  className={`p-1 ${votedPosts[post.id] === 'down' ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
+                >
+                  <LuArrowBigDown style={{ fontSize: '32px', cursor: 'pointer' }} />
+                </button>
+                {voteErrors[post.id] && (
+                  <p className="text-red-500 text-xs mt-1 text-center max-w-[120px]">
+                    {voteErrors[post.id]}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="p-6">
+              <h3 
+                className="font-bold text-xl text-gray-900 mb-2" 
+                style={{ width: '50vw', borderRadius: '10px', padding: '12px', direction: 'rtl' }}
+              >
+                {post.title}
+              </h3>
+              <p 
+                className="text-gray-700 whitespace-pre-line" 
+                style={{ width: '50vw', paddingLeft: '22px', direction: 'rtl' }}
+              >
+                {post.content}
+              </p>
+              
+              <div className="mt-2" 
+              style={{marginTop:'25px', }}
+              >
+                {post.tags && post.tags.map((tag, index) => (
+                  <span key={index} className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                  style={{color:'#406ECB', textAlign:'center',padding:'15px 32px 15px 32px' ,backgroundColor:'#C2D0EE',borderRadius:'15px'}}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="px-6 pb-4 flex justify-between items-center">
+              <button 
+                onClick={() => toggleComments(post.id)}
+                className="flex items-center gap-2 text-blue-500 hover:text-blue-700 focus:outline-none"
+                style={{marginTop:'30px', padding: '8px 16px', borderRadius: '8px', backgroundColor: '#f0f7ff'}}
+              >
+                <FaComment />
+                <span>{post.comments?.length || 0} Comments</span>
+              </button>
+              
+              {expandedPost === post.id && (
+                <button 
+                  onClick={() => setExpandedPost(null)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <FaTimes />
+                </button>
+              )}
+            </div>
+
+            {expandedPost === post.id && (
+              <div className="border-t border-gray-200 mt-4 pt-4">
+                <div className="max-h-96 overflow-y-auto px-6">
+                  <CommentSection
+                    postId={post.id}
+                    comments={post.comments || []}
+                    showInput={showInput}
+                    addComment={addComment}
+                    onVote={onVote}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
+export default Posts;
+
+
+
+
+
+
+
+
+{/*
+  const filterPostsByTags = (query) => {
+    if (!query) {
+      setFilteredPosts(posts);
+    } else {
+      const filtered = posts.filter(post =>
+        post.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+      );
+      setFilteredPosts(filtered);
+    }
+  };  
+  
+  */}
+
+
+
+
+  Roadmap
+
+
+  import React, { useState, useEffect } from "react";
+
+// Dynamically import Mermaid
+let mermaidAPI;
+if (typeof window !== "undefined") {
+  import("mermaid")
+    .then(m => {
+      mermaidAPI = m.default || m;
+      mermaidAPI.initialize({
+        startOnLoad: false,
+        theme: "default",
+      });
+      console.log("Mermaid initialized successfully.");
+    })
+    .catch(err => {
+      console.error("Failed to load or initialize Mermaid:", err);
+    });
+}
+
+// Placeholder for HeaderApp
+const HeaderApp = () => (
+  <div style={{ padding: '1rem', backgroundColor: '#f0f0f0', textAlign: 'center', marginBottom: '1rem', borderRadius: '8px' }}>
+    <h2>Roadmap Application Header</h2>
+  </div>
+);
+
+const RoadMap = () => {
+  const [svg, setSvg] = useState("");
+  const [isMermaidReady, setIsMermaidReady] = useState(false);
+  const [mermaidLoadError, setMermaidLoadError] = useState(null);
+
+  const [major, setMajor] = useState("Backend");
+  const [roadmapType, setRoadmapType] = useState("Outside");
+
+  const initialBackendChart = `graph TD
+  A[Backend RoadMap]
+  A -.-> B[PHP & Laravel]
+  A -.-> C[MySQL]
+  C -.-> D[DataBase1]
+  A -.-> E[OOP]
+  E -.-> F[Introduction to Programming]
+  classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+  class A,B,C,D,E,F customStyle;
+  classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+  class A blueStyle;
+  `;
+  const [chartDefinition, setChartDefinition] = useState(initialBackendChart);
+
+  // State for Gemini API feature
+  const [geminiResponse, setGeminiResponse] = useState("");
+  const [isGeminiLoading, setIsGeminiLoading] = useState(false);
+  const [currentRoadmapContext, setCurrentRoadmapContext] = useState("Backend Development"); // Initial context
+
+  // Effect to check for mermaidAPI readiness
+  useEffect(() => {
+    if (mermaidAPI) {
+      setIsMermaidReady(true);
+    } else {
+      const interval = setInterval(() => {
+        if (mermaidAPI) {
+          setIsMermaidReady(true);
+          clearInterval(interval);
+        }
+      }, 100);
+      const timeout = setTimeout(() => {
+        clearInterval(interval);
+        if (!mermaidAPI) {
+          console.error("Mermaid API failed to load after timeout.");
+          setMermaidLoadError("Mermaid API failed to load. Diagrams cannot be displayed.");
+        }
+      }, 5000);
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
+    }
+  }, []);
+
+  // Effect to render Mermaid diagram
+  useEffect(() => {
+    if (typeof window === "undefined" || !isMermaidReady || mermaidLoadError) {
+      if (mermaidLoadError) {
+        setSvg(`<pre style="color: red; white-space: pre-wrap;">${mermaidLoadError}</pre>`);
+      }
+      return;
+    }
+    const renderMermaid = async () => {
+      try {
+        const { svg: generatedSvg } = await mermaidAPI.render(`mermaid-${Date.now()}`, chartDefinition);
+        setSvg(generatedSvg);
+      } catch (error) {
+        console.error("Error rendering Mermaid diagram:", error);
+        setSvg(`<pre style="color: red; white-space: pre-wrap;">Error rendering diagram: ${error.message}\n\nChart Definition (check syntax errors):\n${chartDefinition}</pre>`);
+      }
+    };
+    renderMermaid();
+  }, [chartDefinition, isMermaidReady, mermaidLoadError]);
+
+  // Function to fetch insights from Gemini API
+  const fetchGeminiInsights = async () => {
+    if (!currentRoadmapContext) {
+      setGeminiResponse("Please select and apply a roadmap first.");
+      return;
+    }
+    setIsGeminiLoading(true);
+    setGeminiResponse(""); // Clear previous response
+
+    const prompt = `Provide a brief overview of ${currentRoadmapContext}. What are the key technologies, skills, or core subject areas someone should focus on for this path/curriculum? What are some common career roles or outcomes associated with it? Keep the response concise and informative, suitable for a quick overview.`;
+
+    const apiKey = ""; // Left empty as per instructions for Canvas environment
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    
+    const payload = {
+      contents: [{
+        role: "user",
+        parts: [{ text: prompt }]
+      }]
+    };
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Gemini API error:", errorData);
+        throw new Error(`Gemini API request failed with status ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
+      }
+
+      const result = await response.json();
+
+      if (result.candidates && result.candidates.length > 0 &&
+          result.candidates[0].content && result.candidates[0].content.parts &&
+          result.candidates[0].content.parts.length > 0) {
+        const text = result.candidates[0].content.parts[0].text;
+        setGeminiResponse(text.replace(/\n/g, "<br />")); // Replace newlines with <br /> for HTML display
+      } else {
+        console.error("Unexpected response structure from Gemini API:", result);
+        setGeminiResponse("Received an unexpected response from the AI. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error fetching Gemini insights:", error);
+      setGeminiResponse(`Failed to fetch AI insights. ${error.message}`);
+    } finally {
+      setIsGeminiLoading(false);
+    }
+  };
+
+  // Handle the Apply button click
+  const handleApply = () => {
+    // Reset Gemini response when applying a new roadmap
+    setGeminiResponse(""); 
+    setIsGeminiLoading(false);
+
+    if (roadmapType === "Inside") {
+      setCurrentRoadmapContext("a comprehensive Computer Engineering curriculum");
+      setChartDefinition(`graph TD
+    MainTitle["Computer Engineering Curriculum (خارطة مواد قسم هندسة الحاسوب)"]
+    subgraph "Level 1 / Foundational"; RQU101["RQU101<br/>اللغة الإنكليزية (1)"]; RQF212["RQF212<br/>الكيمياء"]; RQITC420["RQITC420<br/>مدخل إلى علوم الحاسوب"]; RQF104["RQF104<br/>رياضيات 1"]; RQF314["RQF314<br/>فيزياء"]; RQF210["RQF210<br/>أسس الهندسة الكهربائية"]; end
+    subgraph "Level 2"; RQU207["RQU207<br/>اللغة الإنكليزية (2)"]; RQFE1["RQFE1<br/>مدخل إلى الخوارزميات"]; RQF106["RQF106<br/>مدخل إلى البرمجة"]; RQITC419["RQITC419<br/>دارات منطقية"]; RQF208["RQF208<br/>رياضيات 2"]; RQF105["RQF105<br/>الميكانيك الهندسي"]; end
+    subgraph "Level 3"; RQFE5["RQFE5<br/>مهارات في اللغة الانكليزية<br/>للتطبيقات الهندسية"]; RQITC521["RQITC521<br/>الخوارزميات وبنى المعطيات"]; RQITC522["RQITC522<br/>برمجة غرضية التوجه"]; RQITC523["RQITC523<br/>تنظيم الحواسيب ولغة التجميع"]; RQF313["RQF313<br/>رياضيات 3"]; RQF315["RQF315<br/>رسم هندسي"]; RQFE3["RQFE3<br/>مقدمة في تقانة الشبكات"]; end
+    subgraph "Level 4"; RQITC629["RQITC629<br/>برمجة النظم"]; RQITC524["RQITC524<br/>مدخل إلى الذكاء الصنعي"]; RQITC627["RQITC627<br/>تنظيم وبنيان الحواسيب"]; RQF417["RQF417<br/>تطبيقات في الاحصاء<br/>الهندسي والاحتمالات"]; RQITC418["RQITC418<br/>تحليل عددي"]; RQITC628["RQITC628<br/>تراسل المعطيات وشبكات<br/>الحواسيب (1)"]; end
+    subgraph "Level 5 / Specialization Foundations"; RQITC734_Theory["RQITC734_Theory<br/>نظرية الحوسبة"]; RQITC625["RQITC625<br/>قواعد معطيات (1)"]; RQITC730["RQITC730<br/>بحوث العمليات"]; RQFE2["RQFE2<br/>نمذجة ومحاكاة"]; RQITC836["RQITC836<br/>تراسل المعطيات وشبكات<br/>الحواسيب (2)"]; RQITC837_SE1["RQITC837_SE1<br/>هندسة برمجيات (1)"]; RQITC733["RQITC733<br/>نظم التشغيل"]; end
+    subgraph "Level 6 / Advanced Topics & Electives Part 1"; RQITC837_Compilers["RQITC837_Compilers<br/>تصميم المترجمات"]; RQITE947["RQITE947<br/>بناء مترجمات"]; RQITC732["RQITC732<br/>قواعد معطيات (2)"]; RQITC626["RQITC626<br/>تقانات الإنترنت وبرمجة الويب"]; RQITE051["RQITE051<br/>نظم استرجاع البيانات"]; RQITE957["RQITE957<br/>النمذجة والمحاكاة (متقدم)"]; RQITE049["RQITE049<br/>قواعد معطيات متقدمة"]; RQITE956["RQITE956<br/>الرجل الآلي والنظم الخبيرة"]; RQITE953["RQITE953<br/>أمن شبكات حاسوبية"]; end
+    subgraph "Level 6 / Advanced Topics & Electives Part 2"; RQITC838["RQITC838<br/>تطوير التطبيقات"]; RQITE054["RQITE054<br/>الشبكات اللاسلكية"]; RQITE952["RQITE952<br/>إدارة شبكات"]; RQITE058["RQITE058<br/>التعلم الآلي والشبكات العصبونية"]; RQITC835["RQITC835<br/>أمن نظم المعلومات"]; RQITE055["RQITE055<br/>تصميم شبكات"]; RQITE946["RQITE946<br/>برمجة تفرعية"]; RQF209["RQF209<br/>الجودة والوثوقية"]; RQITC043["RQITC043<br/>أنظمة الوسائط المتعددة"]; end
+    subgraph "Level 7 / Capstone & Final Specializations"; RQITC940["RQITC940<br/>نظم المعلومات الموزعة"]; RQITE050["RQITE050<br/>الحوسبة النقالة"]; RQITE059["RQITE059<br/>الرؤية الحاسوبية"]; RQITC941["RQITC941<br/>نظم المعلومات الإدارية"]; RQITE948["RQITE948<br/>هندسة برمجيات (2)"]; RQITC942["RQITC942<br/>مشروع تخرج"]; end
+    RQU101-.->RQU207; RQITC420-.->RQFE1; RQITC420-.->RQF106; RQF104-.->RQF208; RQF314-.->RQITC419; RQF314-.->RQF105; RQF210-.->RQFE3;
+    RQU207-.->RQFE5; RQFE1-.->RQITC521; RQF106-.->RQITC521; RQF106-.->RQITC522; RQF106-.->RQITC523; RQITC419-.->RQITC523; RQF208-.->RQF313; RQF105-.->RQF315;
+    RQITC521-.->RQITC629; RQITC522-.->RQITC629; RQITC521-.->RQITC524; RQITC523-.->RQITC627; RQF313-.->RQF417; RQF313-.->RQITC418; RQFE3-.->RQITC628;
+    RQITC629-.->RQITC734_Theory; RQITC524-.->RQITC734_Theory; RQITC522-.->RQITC625; RQITC521-.->RQITC625; RQF417-.->RQITC730; RQF417-.->RQFE2; RQITC418-.->RQFE2; RQITC628-.->RQITC836; RQITC629-.->RQITC837_SE1; RQITC625-.->RQITC837_SE1; RQITC627-.->RQITC733; RQITC629-.->RQITC733;
+    RQITC734_Theory-.->RQITC837_Compilers; RQITC837_Compilers-.->RQITE947; RQITC625-.->RQITC732; RQITC625-.->RQITC626; RQITC522-.->RQITC626; RQITC625-.->RQITE051; RQFE2-.->RQITE957; RQITC732-.->RQITE049; RQITC524-.->RQITE956; RQITC836-.->RQITE953; RQITC626-.->RQITC838; RQITE953-.->RQITE054; RQITE953-.->RQITE952; RQITC524-.->RQITE058; RQF417-.->RQITE058; RQITC733-.->RQITC835; RQITC836-.->RQITC835; RQITE054-.->RQITE055; RQITC733-.->RQITE946; RQITC626-.->RQITC043;
+    RQITC733-.->RQITC940; RQITC732-.->RQITC940; RQITC838-.->RQITE050; RQITE058-.->RQITE059; RQITC732-.->RQITC941; RQITC837_SE1-.->RQITE948;
+    RQITE948-.->RQITC942; RQITE055-.->RQITC942; RQITE050-.->RQITC942; RQITE059-.->RQITC942; RQITE946-.->RQITC942; RQITE049-.->RQITC942;
+    classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+    classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+    class MainTitle blueStyle;
+    class RQU101,RQF212,RQITC420,RQF104,RQF314,RQF210,RQU207,RQFE1,RQF106,RQITC419,RQF208,RQF105,RQFE5,RQITC521,RQITC522,RQITC523,RQF313,RQF315,RQFE3,RQITC629,RQITC524,RQITC627,RQF417,RQITC418,RQITC628,RQITC734_Theory,RQITC625,RQITC730,RQFE2,RQITC836,RQITC837_SE1,RQITC733,RQITC837_Compilers,RQITE947,RQITC732,RQITC626,RQITE051,RQITE957,RQITE049,RQITE956,RQITE953,RQITC838,RQITE054,RQITE952,RQITE058,RQITC835,RQITE055,RQITE946,RQF209,RQITC043,RQITC940,RQITE050,RQITE059,RQITC941,RQITE948,RQITC942 customStyle;
+`);
+    } else { // "Outside" selected
+      let newChartDef = '';
+      let newContext = '';
+      if (major === "Front-end") {
+        newContext = "Front-end Web Development";
+        newChartDef = `graph TD
+  A[Front end RoadMap]; C[Introduction to Programming]-.->B[Html+css]; B-.->I[pure JavaScript]; I-.->E[React]; A-.->C; A-.->D[OOP]; A-.->F[UI/UX]; A-.->H[introduction into web];
+  classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67; class A,B,C,D,E,F,I,H customStyle;
+  classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px; class A blueStyle;`;
+      } else if (major === "Backend") {
+        newContext = "Backend Web Development";
+        newChartDef = initialBackendChart;
+      } else if (major === "Flutter") {
+        newContext = "Flutter Mobile App Development";
+        newChartDef = `graph TD
+  A[Flutter RoadMap]; A-.->B[Dart Basics]; A-.->C[Flutter Widgets]; B-.->D[State Management]; C-.->D; A-.->E[Responsive Design]; A-.->F[Animations]; A-.->H[Testing];
+  classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67; class A,B,C,D,E,F,H customStyle;
+  classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px; class A blueStyle;`;
+      } else if (major === "AI") {
+        newContext = "Artificial Intelligence and Machine Learning";
+        newChartDef = `graph TD
+  A[AI RoadMap]; A-.->B[Python]; A-.->C[Machine Learning]; A-.->D[NLP]; C-.->E[Deep Learning]; A-.->F[Data Science];
+  classDef customStyle fill:none,stroke:#FACF67,stroke-width:3px,color:#FACF67,font-size:20px; class A,B,C,D,E,F customStyle;
+  classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px; class A blueStyle;`;
+      }
+      setChartDefinition(newChartDef);
+      setCurrentRoadmapContext(newContext);
+    }
+  };
+
+  // JSX for the component
+  const renderDiagramArea = () => {
+    if (mermaidLoadError) {
+      return <div className="w-full md:w-2/3 lg:w-3/4 overflow-auto bg-white shadow-lg rounded-lg p-4 text-red-600 flex items-center justify-center" style={{ minHeight: '400px' }}><div><h3 className="font-bold text-lg text-center">Mermaid Loading Error</h3><p className="text-center">{mermaidLoadError}</p></div></div>;
+    }
+    if (!isMermaidReady) {
+      return <div className="w-full md:w-2/3 lg:w-3/4 flex items-center justify-center overflow-auto bg-white shadow-lg rounded-lg p-2" style={{ minHeight: '400px' }}><p className="text-gray-500">Loading diagram engine...</p></div>;
+    }
+    return <div id="mermaidGraphContainer" className="w-full md:w-2/3 lg:w-3/4 overflow-auto bg-white shadow-lg rounded-lg p-2" style={{ minHeight: '400px' }} dangerouslySetInnerHTML={{ __html: svg }} />;
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center p-4">
+      <HeaderApp />
+      <div className="TestRoad w-full max-w-7xl flex flex-col md:flex-row mt-4 gap-4"> {/* Increased max-width and added gap */}
+        <div className="ContentRoad w-full md:w-1/3 lg:w-1/4 p-4 bg-white shadow-lg rounded-lg mb-4 md:mb-0">
+          <h1 className="TypeRoadMap text-xl font-semibold mb-3 text-gray-700">Type :</h1>
+          <div className="FirstMajor mb-4">
+            <select name="type" value={roadmapType} onChange={(e) => setRoadmapType(e.target.value)} required className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+              <option value="Outside">Outside</option>
+              <option value="Inside">Inside</option>
+            </select>
+          </div>
+
+          {roadmapType === "Outside" && (
+            <div className="SecondMajor mb-6">
+               <h1 className="TypeRoadMap text-xl font-semibold mb-3 text-gray-700">Major :</h1>
+              <select name="Major" value={major} onChange={(e) => setMajor(e.target.value)} required className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                <option value="Backend">Backend</option>
+                <option value="Front-end">Front-end</option>
+                <option value="Flutter">Flutter</option>
+                <option value="AI">AI</option>
+              </select>
+            </div>
+          )}
+
+          <div className="ApplyButton mb-4"> {/* Added margin-bottom */}
+            <button className="ApplyRoad w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out" onClick={handleApply}>
+              Apply Roadmap
+            </button>
+          </div>
+
+          {/* Gemini AI Insights Section */}
+          <div className="GeminiInsights mb-6">
+            <button 
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out disabled:opacity-50"
+              onClick={fetchGeminiInsights}
+              disabled={isGeminiLoading || !currentRoadmapContext}
+            >
+              {isGeminiLoading ? "✨ Thinking..." : "✨ Get AI Insights on this Roadmap"}
+            </button>
+            {geminiResponse && (
+              <div className="mt-4 p-3 bg-gray-100 rounded-md border border-gray-200 text-sm text-gray-700" dangerouslySetInnerHTML={{ __html: geminiResponse }} />
+            )}
+          </div>
+
+
+          <div className="References mt-6 pt-4 border-t border-gray-200">
+            <h3 className="text-lg font-semibold mb-3 text-gray-700">References :</h3>
+            <ul className="list-disc pl-5 space-y-1 text-sm text-blue-600">
+              <li><a href="#" target="_blank" rel="noreferrer" className="hover:underline">Introduction to Programming</a></li>
+              <li><a href="#" target="_blank" rel="noreferrer" className="hover:underline">Database 1</a></li>
+              <li><a href="#" target="_blank" rel="noreferrer" className="hover:underline">Object-Oriented Programming (OOP)</a></li>
+              <li><a href="#" target="_blank" rel="noreferrer" className="hover:underline">HTML & CSS</a></li>
+              <li><a href="#" target="_blank" rel="noreferrer" className="hover:underline">JavaScript Crash Course</a></li>
+            </ul>
+          </div>
+        </div>
+        {renderDiagramArea()}
+      </div>
+    </div>
+  );
+};
+
+export default RoadMap;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Notifications : New 
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { FaHome, FaRoad, FaUser, FaSearch, FaBell } from 'react-icons/fa';
+import { MdGroups2 } from 'react-icons/md';
+import axios from 'axios';
+import './HeaderApp.css';
+import photo from '../../assets/images.jpg';
+import { TbLogout2 } from "react-icons/tb";
+
+export default function HeaderApp({ onSearch }) {
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [profilePhoto, setProfilePhoto] = useState("");
+
+  const token = localStorage.getItem('token');
+  const availableTags = ['Python', 'JavaScript', 'Java', 'C++', 'Ruby', 'Php'];
+  const filteredTags = availableTags.filter(tag =>
+    tag.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  useEffect(() => {
+    const storedPhoto = localStorage.getItem("profilePhoto");
+    if (storedPhoto) {
+      setProfilePhoto(storedPhoto);
+    }
+  }, []);
+
+  // Define your API base URL
+  const API_URL = import.meta.env.VITE_API_BASE_URL;
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/student/get_all_notification`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      const rawNotifications = response.data || [];
+      const lastClearedTime = localStorage.getItem("lastNotificationsClear");
+      const clearedTimestamp = lastClearedTime
+        ? new Date(lastClearedTime).getTime()
+        : 0;
+
+      const processedNotifications = rawNotifications.map(notification => {
+        const username =
+          notification.comment?.user?.first_name ||
+          notification.user?.first_name ||
+          (notification.body && notification.body.split("'")[1]) ||
+          'User';
+
+        const commentContent =
+          notification.comment?.content ||
+          (notification.body && notification.body.split("'")[3]) ||
+          'New comment';
+
+        return {
+          id: notification.id || Math.random().toString(36).substr(2, 9),
+          title: notification.title || 'New Comment',
+          username: username,
+          comment: commentContent,
+          createdAt: notification.created_at || new Date().toISOString(),
+        };
+      });
+
+      // Filter notifications to retain only ones created after the last cleared time
+      const newNotifications = lastClearedTime
+        ? processedNotifications.filter(
+            n => new Date(n.createdAt).getTime() > clearedTimestamp
+          )
+        : processedNotifications;
+
+      setNotifications(newNotifications);
+      setUnreadCount(newNotifications.length);
+    } catch (error) {
+      console.error('Failed to fetch notifications', error);
+      setNotifications([]);
+      setUnreadCount(0);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const notificationPolling = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(notificationPolling);
+  }, [token]);
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    if (onSearch) {
+      onSearch(query);
+    }
+  };
+
+  // Toggle the modal for notifications
+  const toggleNotificationModal = () => {
+    setIsNotificationModalOpen(prev => !prev);
+    // Optionally, immediately refresh notifications when opening the modal
+    if (!isNotificationModalOpen) {
+      fetchNotifications();
+    }
+  };
+
+  return (
+    <header className="bg-white">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
+        <div className="flex lg:flex-1">
+          <a href="#" className="-m-1.5 p-1.5">
+            <img
+              src={photo}
+              alt="AspuLogo"
+              className="rounded-full w-12 h-8 object-cover"
+            />
+          </a>
+          <div className="relative">
+            <div className="search-container">
+              <input
+                className="aheadLogo border rounded p-2"
+                placeholder="Search by Subject or Tag"
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+              <span className="search-icon absolute right-2 top-2 text-gray-600">
+                <FaSearch />
+              </span>
+            </div>
+            {searchQuery && (
+              <div className="mt-1 text-green-600 text-sm">
+                {filteredTags.length > 0
+                  ? `Matching tags: ${filteredTags.join(', ')}`
+                  : "No matching tags found."}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="hidden lg:flex lg:gap-x-12" style={{ width: '50%' }}>
+          <Link
+            to="/Home"
+            className="text-gray-900 flex flex-col items-center text-sm font-semibold"
+          >
+            <FaHome className="size-6" />
+            <span>Home</span>
+          </Link>
+          <Link
+            to="/Roadmap"
+            className="text-gray-900 flex flex-col items-center text-sm font-semibold"
+          >
+            <FaRoad className="size-6" />
+            <span>Roadmap</span>
+          </Link>
+          <Link
+            to="/Groups"
+            className="text-gray-900 flex flex-col items-center text-sm font-semibold"
+          >
+            <MdGroups2 className="size-6" />
+            <span>Groups</span>
+          </Link>
+          <Link
+            to="/Profile"
+            className="text-gray-900 flex flex-col items-center text-sm font-semibold"
+          >
+            <FaUser className="size-6" />
+            <span>Account</span>
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-4 relative">
+          <Link to="/login">
+            <TbLogout2 size={25} style={{ cursor: 'pointer', marginRight: '20px' }} />
+          </Link>
+
+          <div className="relative cursor-pointer" onClick={toggleNotificationModal}>
+            <FaBell className="text-gray-700 size-6" />
+            {unreadCount > 0 && (
+              <span
+                className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full"
+              >
+                {unreadCount}
+              </span>
+            )}
+          </div>
+
+          {/*
+          <Link to="/profile">
+            <button className="profile-btn">
+              <img src={profilePhoto} alt="Profile" className="rounded-full w-8 h-8" />
+            </button>
+          </Link>
+          */}
+        </div>
+      </nav>
+
+      {/* Notification Modal */}
+      {isNotificationModalOpen && (
+        <div className="notification-modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg w-80 p-4 relative">
+            <button
+              onClick={toggleNotificationModal}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            >
+              X
+            </button>
+            <h4 className="font-semibold text-gray-700 mb-2">Notifications</h4>
+            <ul className="space-y-2 max-h-64 overflow-auto">
+              {notifications.length > 0 ? (
+                notifications.map(notification => (
+                  <li
+                    key={notification.id}
+                    className={`text-sm border-b pb-2 ${!notification.is_read ? 'bg-blue-50' : ''}`}
+                  >
+                    <p className="text-gray-600 font-semibold">{notification.title}</p>
+                    <p className="text-gray-500">User: {notification.username}</p>
+                    <p className="text-gray-500">Comment: {notification.comment}</p>
+                    {!notification.is_read && (
+                      <p className="text-xs text-blue-500 mt-1">New</p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-1">
+                      {new Date(notification.createdAt).toLocaleString()}
+                    </p>
+                  </li>
+                ))
+              ) : (
+                <li className="text-sm text-gray-500">No notifications yet</li>
+              )}
+            </ul>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+import React, { useState, useEffect } from "react";
+import HeaderApp from "../HeaderApp/HeaderApp";
+import { gsap } from "gsap";
+import "./RoadMap.css";
+import { href } from "react-router-dom";
+
+const RoadMap = () => {
+  const [major, setMajor] = useState("Backend");
+  const [type, setType] = useState("Outside");
+  const [chartDefinition, setChartDefinition] = useState(getRandomChart("Backend", "Outside"));
+  const [svg, setSvg] = useState("");
+
+const references = [
+  {
+    title: "Introduction to Programming",
+    href: "https://www.youtube.com/watch?v=zOjov-2OZ0E"
+  },
+  {
+    title: "Database 1",
+    href: "https://www.youtube.com/watch?v=wR0jg0eQsZA"
+  },
+  {
+    title: "Object-Oriented Programming (OOP)",
+    href: "https://www.youtube.com/watch?v=pTB0EiLXUC8"
+  },
+  {
+    title: "HTML & CSS",
+    href: "https://www.youtube.com/watch?v=G3e-cpL7ofc"
+  },
+  {
+    title: "JavaScript Crash Course",
+    href: "https://www.youtube.com/watch?v=hdI2bqOjy3c"
+  } , 
+
+
+];
+
+
+
+  // Render the diagram whenever the chart definition changes.
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof document === "undefined") return;
+    renderMermaid();
+  }, [chartDefinition]);
+
+  const renderMermaid = async () => {
+    try {
+      const mermaidModule = await import("mermaid");
+      const mermaid = mermaidModule.default || mermaidModule;
+      mermaid.initialize({ startOnLoad: false, theme: "default" });
+      const { svg: generatedSvg } = await mermaid.render("mermaidGraph", chartDefinition);
+      setSvg(generatedSvg);
+      // Wait a moment for the new SVG to be rendered into the DOM
+      setTimeout(() => {
+        const container = document.querySelector(".mermaid-container");
+        if (container) {
+          // Animate the whole container (fade in & slide up)
+          gsap.from(container, { duration: 0.6, opacity: 0, y: 30, ease: "power2.out" });
+          // Animate each node sequentially
+          const nodes = container.querySelectorAll(".node");
+          gsap.from(nodes, { duration: 0.4, opacity: 0, scale: 0.8, stagger: 0.1, ease: "back.out(1.7)" });
+          // Add a subtle click ripple on each node
+          nodes.forEach((node) => {
+            node.addEventListener("click", () => {
+              gsap.fromTo(
+                node,
+                { scale: 1 },
+                { scale: 1.2, duration: 0.2, yoyo: true, repeat: 1, ease: "power1.inOut" }
+              );
+            });
+          });
+        }
+      }, 300);
+    } catch (error) {
+      console.error("Error rendering Mermaid diagram:", error);
+    }
+  };
+
+  // Extra GSAP timeline for transitioning between diagram updates.
+  const handleGenerate = () => {
+    const container = document.querySelector(".mermaid-container");
+    if (container) {
+      gsap.to(container, {
+        duration: 0.5,
+        opacity: 0,
+        x: -50,
+        ease: "power2.in",
+        onComplete: () => {
+          // Update chart definition to force re-render of new diagram.
+          setChartDefinition(getRandomChart(major, type));
+          // Let the renderMermaid handle the fade-in animation afterward.
+        }
+      });
+    } else {
+      // Fallback in case container is not yet in the DOM.
+      setChartDefinition(getRandomChart(major, type));
+    }
+  };
+
+  const handleTypeChange = (e) => {
+    const newType = e.target.value;
+    setType(newType);
+    setChartDefinition(getRandomChart(major, newType));
+  };
+
+  const handleMajorChange = (e) => {
+    const newMajor = e.target.value;
+    setMajor(newMajor);
+    setChartDefinition(getRandomChart(newMajor, type));
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center">
+      <HeaderApp />
+
+      <div className="TestRoad">
+        <div className="ContentRoad">
+          <h1 className="TypeRoadMap">Type:</h1>
+
+          <div className="FirstMajor">
+            <select name="type" value={type} onChange={handleTypeChange} required>
+              <option value="Outside">Outside</option>
+              <option value="Inside">Inside</option>
+            </select>
+          </div>
+
+          <div className="SecondMajor" style={{ marginBottom: "25px" }}>
+            <select name="Major" value={major} onChange={handleMajorChange} required>
+              <option value="Backend">Backend</option>
+              <option value="Front-end">Front-end</option>
+              <option value="Flutter">Flutter</option>
+              <option value="AI">AI</option>
+            </select>
+          </div>
+
+          <div className="GenerateButton" style={{ marginTop: "10px" }}>
+            <button className="GenerateRoad" onClick={handleGenerate}>
+              Generate a new RoadMap
+            </button>
+          </div>
+
+          <div className="References">
+    <h3 style={{ marginBottom: "15px" }}>References:</h3>
+    <ul>
+      {references.map((ref, index) => (
+        <li key={index}>
+          <a href={ref.href} target="_blank" rel="noreferrer">
+            {ref.title}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+        </div>
+
+        {/* Use a dynamic key so that new charts re-mount (triggering the CSS/GSAP animations) */}
+        <div
+          key={chartDefinition}
+          className="mermaid-container"
+          style={{
+            marginLeft: "150px",
+            width: "50vw",
+            height: "50vh",
+            transform: "scale(1.2)",
+            transformOrigin: "top left"
+          }}
+          dangerouslySetInnerHTML={{ __html: svg }}
+        />
+      </div>
+    </div>
+  );
+};
+
+const getRandomChart = (major, type) => {
+  const charts = {
+    Backend: {
+      Outside: [
+        `graph TD
+          A[Backend RoadMap v1]
+          A -.-> B[Node.js]
+          A -.-> C[Express.js]
+          C -.-> D[MongoDB]
+          A -.-> E[REST API]
+          classDef customStyle fill:none,stroke:#60a5fa,stroke-width:2px,color:#60a5fa;
+          classDef blueStyle fill:none,stroke:#60a5fa,stroke-width:3px,color:#4f46e5,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[Backend RoadMap v2]
+          A -.-> B[PHP & Laravel]
+          A -.-> C[MySQL]
+          C -.-> D[Database Design]
+          A -.-> E[OOP]
+          E -.-> F[Programming Fundamentals]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E,F customStyle;
+          class A blueStyle;`
+      ],
+      Inside: [
+        `graph TD
+          A[College Backend Curriculum]
+          A -.-> B[Algorithms & Data Structures]
+          B -.-> C[Introduction to Node.js]
+          C -.-> D[Database Systems]
+          A -.-> E[Theory of Computation]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[Backend Studies]
+          A -.-> B[Computer Networks]
+          B -.-> C[Systems Programming]
+          A -.-> D[Software Engineering]
+          D -.-> E[Project Management]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`
+      ]
+    },
+    "Front-end": {
+      Outside: [
+        `graph TD
+          A[Front-end RoadMap v1]
+          A -.-> B[HTML + CSS]
+          B -.-> C[JavaScript]
+           A -.-> D[React]
+          D -.-> E[Next.js]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[Front-end RoadMap v2]
+          A -.-> B[HTML/CSS]
+          A -.-> C[JavaScript]
+          A -.-> D[TypeScript]
+          C -.-> E[Vue.js]
+          A -.-> F[UI/UX Principles]
+          F-.->G[Figma]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E,F,G customStyle;
+          class A blueStyle;`
+      ],
+      Inside: [
+        `graph TD
+          A[College Front-end Curriculum]
+          A -.-> B[Web Design Fundamentals]
+          B -.-> C[HTML + CSS]
+          C -.-> D[JavaScript Basics]
+          D -.-> E[React Fundamentals]
+          A -.-> F[UX/UI Design Principles]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E,F customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[Front-end Studies]
+          A -.-> B[Digital Media & Design]
+          B -.-> C[Graphic Design]
+          A -.-> D[Interactive Programming]
+          D -.-> E[JavaScript & React]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`
+      ]
+    },
+    Flutter: {
+      Outside: [
+        `graph TD
+          A[Flutter RoadMap v1]
+          A -.-> B[Dart Basics]
+          B -.-> C[Widgets]
+          C -.-> D[State Management]
+          D -.-> E[Testing]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[Flutter RoadMap v2]
+          A -.-> B[Flutter Installation]
+          A -.-> C[Material Widgets]
+          C -.-> D[Navigation]
+          A -.-> E[Animations]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`
+      ],
+      Inside: [
+        `graph TD
+          A[College Flutter Curriculum]
+          A -.-> B[Introduction to Dart]
+          B -.-> C[UI/UX Design in Flutter]
+          C -.-> D[Advanced State Management]
+          A -.-> E[Capstone Project]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[Flutter Studies]
+          A -.-> B[Mobile App Design]
+          B -.-> C[Responsive Layouts]
+          A -.-> D[Integration with Firebase]
+          D -.-> E[Deployment Strategies]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`
+      ]
+    },
+    AI: {
+      Outside: [
+        `graph TD
+          A[AI RoadMap v1]
+          A -.-> B[Python]
+          B -.-> C[Numpy + Pandas]
+          C -.-> D[Machine Learning]
+          D -.-> E[Deep Learning]
+          A -.-> F[Data Science]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E,F customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[AI RoadMap v2]
+          A -.-> B[Python Basics]
+          B -.-> C[Scikit-learn]
+          C -.-> D[TensorFlow]
+          D -.-> E[NLP]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`
+      ],
+      Inside: [
+        `graph TD
+          A[College AI Program]
+          A -.-> B[Mathematical Foundations]
+          B -.-> C[Python for Data Science]
+          C -.-> D[Machine Learning Basics]
+          D -.-> E[Deep Learning Fundamentals]
+          A -.-> F[Capstone Project]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E,F customStyle;
+          class A blueStyle;`,
+        `graph TD
+          A[AI Studies]
+          A -.-> B[Statistics & Probability]
+          B -.-> C[Data Analysis]
+          A -.-> D[Introduction to Neural Networks]
+          D -.-> E[Computer Vision]
+          classDef customStyle fill:none,stroke:#FACF67,stroke-width:2px,color:#FACF67;
+          classDef blueStyle fill:none,stroke:#007BFF,stroke-width:3px,color:#007BFF,font-size:20px;
+          class A,B,C,D,E customStyle;
+          class A blueStyle;`
+      ]
+    }
+  };
+
+  const majorCharts = charts[major] || charts["Backend"];
+  const typeCharts = majorCharts[type] || majorCharts["Outside"];
+  const randomIndex = Math.floor(Math.random() * typeCharts.length);
+  return typeCharts[randomIndex];
+};
+
+export default RoadMap;

@@ -1,0 +1,9 @@
+this file to jira
+
+
+
+formData.append('tags', JSON.stringify(normalizedTags));
+
+
+
+ tags: normalizedTags,

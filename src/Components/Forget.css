@@ -1,0 +1,35 @@
+.Forget-Password {
+display: flex;
+justify-content: center;
+flex-direction: column;
+width: 50%;
+text-align: center;
+align-items: center;
+margin-right: 25px;
+}
+.Did {
+    color: gray;
+}
+.Re-email {
+    width: 250px;
+margin: 6px;
+padding: 8px;
+background-color: rgba(189, 189, 189, 0.5);
+outline: none;
+border: none;
+margin-top: 18px;
+}
+.Next-step {
+    color: white;
+    background-color: rgba(18, 18, 207, 0.877);
+    padding: 6px;
+    border-radius: 14px;
+    font-size: 24px;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    width: 250px;
+    margin-top: 20px;
+    align-items: center;
+}

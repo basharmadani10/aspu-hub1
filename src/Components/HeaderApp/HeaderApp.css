@@ -1,0 +1,111 @@
+
+.search-container {
+    display: flex;
+    align-items: center;
+    color: white;
+    /*border: 1px solid #ccc; */     /* Border for the search box */
+    border-radius: 4px; /* Rounded corners */
+    padding: 5px 10px; /* Padding for the container */
+    width: 220px; /* Adjust width as needed */
+    margin-left: 38px;
+  }
+  .aheadLogo{ 
+    border: none;
+    outline: none;
+    flex: 1; /* Take up the available space */
+    font-size: 14px;
+    background-color: transparent;
+    outline: none;
+    border:transparent ;
+}
+
+.search-icon {
+    color: #1d4ed8; /* Blue icon */
+    font-size: 16px; /* Adjust the icon size */
+    margin-left: 5px;
+    cursor: pointer; /* Show pointer on hover */
+  }
+
+  .search-container:hover {
+    border-color: #888; /* Slightly darker border on hover */
+  }
+  /* Header Styling */
+header {
+  background-color: white;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+
+
+/* Navigation Links */
+nav a {
+  font-size: 8px;
+  font-weight: 600;
+  transition: color 0.2s ease-in-out;
+  color: #ffffff;
+}
+
+nav a:hover {
+  color: #60a5fa; 
+}
+
+.nav-a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0%;
+  background-image: linear-gradient(to right, #4f46e5, #60a5fa);
+  transition: width 0.3s ease;
+}
+
+
+/* Active link (manually set using a class or dynamically) */
+nav a.active {
+  color: #1d4ed8; /* Blue for active icons and text */
+}
+
+/* Icons */
+nav a .icon {
+  font-size: 24px; /* Adjust icon size */
+  margin-bottom: 6px; /* Space between icon and text */
+}
+
+/* Right Section Icons */
+nav .notification-btn,
+nav .profile-btn {
+  font-size: 24px; /* Icon size for notification and profile */
+  color: #7f8c8d; /* Default gray */
+  transition: color 0.2s ease-in-out;
+  margin-left: 3px ;
+  background-color: #fff;
+}
+
+nav .notification-btn:hover,
+nav .profile-btn:hover {
+  color: #1d4ed8; /* Blue on hover */
+}
+
+nav .profile-btn img {
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  cursor: pointer;
+  
+}
+.text-blue-900 {
+  color: rgba(78, 78, 255, 0.792);
+  cursor: pointer;
+}
+.text-blue-900 :hover {
+  color: rgba(137, 137, 253, 0.863);
+  cursor: pointer;
+  transition: .4s ease-in-out;
+}
