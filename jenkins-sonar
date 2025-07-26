@@ -14,7 +14,12 @@ pipeline {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
                     script {
                         def scannerHome = tool 'sonar'
-                        sh "${scannerHome}/bin/sonar-scanner"
+                        sh "${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=aspu-api \
+                            -Dsonar.projectName=ASPU-API \
+                            -Dsonar.projectVersion=1.0 \
+                            -Dsonar.sources=."
+
                     }
                 }
             }
