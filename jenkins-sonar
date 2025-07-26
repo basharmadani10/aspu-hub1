@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "bm106/aspu-api"
+        SONARQUBE_ENV = "sonar"
+        DOCKER_CREDS = 'dockerhub' 
+    }
+
+    stages {
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${SONARQUBE_ENV}") {
+                    sh 'sonar-scanner'
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
+                        docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+                    """
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh "kubectl set image deployment/aspu-api aspu-api=${IMAGE_NAME}:${BUILD_NUMBER}"
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "❌ Pipeline Failed!"
+        }
+        success {
+            echo "✅ Deployment Successful!"
+        }
+    }
+}
