@@ -2,16 +2,20 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "bm106/aspu-api"
+        IMAGE_NAME    = "bm106/aspu-api"
         SONARQUBE_ENV = "sonar"
-        DOCKER_CREDS = 'dockerhub' 
+        DOCKER_CREDS  = "dockerhub"
     }
 
     stages {
+
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    sh 'sonar-scanner'
+                    script {
+                        def scannerHome = tool 'sonar'
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
                 }
             }
         }
@@ -32,7 +36,13 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: "${DOCKER_CREDS}",
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
                     sh """
                         echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
                         docker push ${IMAGE_NAME}:${BUILD_NUMBER}
