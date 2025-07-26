@@ -86,8 +86,6 @@ spec:
               value: aspuhub@gmail.com
             - name: MAIL_FROM_NAME
               value: ASPU-HUB
-
-            # 👇 إعدادات Redis الجديدة
             - name: CACHE_DRIVER
               value: redis
             - name: SESSION_DRIVER
@@ -100,7 +98,6 @@ spec:
               value: Gh8kvYVl9s
             - name: REDIS_PORT
               value: "6379"
-
           ports:
             - containerPort: 80
               name: http-api
@@ -155,7 +152,6 @@ spec:
             periodSeconds: 1800
             timeoutSeconds: 10
             failureThreshold: 1
-
       volumes:
         - name: api-storage-volume
           persistentVolumeClaim:

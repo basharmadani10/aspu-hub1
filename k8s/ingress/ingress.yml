@@ -4,22 +4,14 @@ kind: Ingress
 metadata:
   name: aspu-hub-ingress
   annotations:
-    # Traefik Entrypoints: listen on both HTTP (web) and HTTPS (websecure)
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-
-    # Cert-manager annotation: Use the ClusterIssuer created in Step 2
     cert-manager.io/cluster-issuer: letsencrypt-prod 
-
-    # Traefik Middleware: Apply the HTTP to HTTPS redirection from Step 3
-    # Format: <namespace>-<middleware-name>@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-spa-fallback@kubernetescrd
     traefik.ingress.kubernetes.io/router.middlewares: default-redirect-to-https@kubernetescrd
-
-    # Remove the rewrite-target as it's not typically used for path rewriting in Traefik this way.
-    # traefik.ingress.kubernetes.io/rewrite-target: / 
 spec:
-  ingressClassName: traefik # Ensure this matches your Traefik installation's IngressClass
+  ingressClassName: traefik 
   rules:
-  - host: aspu-hub.ddns.net # <--- YOUR NEW DOMAIN
+  - host: aspu-hub.ddns.net
     http:
       paths:
       - path: /api
@@ -62,19 +54,19 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: quiz-generator-service # Name of your quiz generator service
+            name: quiz-generator-service 
             port:
               number: 80
 
-      - path: / # Frontend path - this will serve your React app
+      - path: / 
         pathType: Prefix
         backend:
           service:
             name: aspu-frontend-service
             port:
               number: 80
-  tls: # TLS configuration for HTTPS
+  tls: 
   - hosts:
-    - aspu-hub.ddns.net # <--- MUST MATCH THE HOST IN RULES
-    secretName: aspu-hub-tls-secret # cert-manager will store the certificate here
-                                   # Traefik will automatically pick this up for HTTPS
+    - aspu-hub.ddns.net 
+    secretName: aspu-hub-tls-secret 
+                    

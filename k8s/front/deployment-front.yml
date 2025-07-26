@@ -7,8 +7,6 @@ metadata:
     app: frontend
 spec:
   replicas: 2
-
-  
   selector:
     matchLabels:
       app: frontend
@@ -19,7 +17,7 @@ spec:
     spec:
       containers:
         - name: aspu-frontend-container
-          image: bm106/aspu-frontend:v5.5.4
+          image: bm106/aspu-frontend:v5.5.6
           resources:
             requests:
               memory: 1Gi
@@ -29,5 +27,11 @@ spec:
               cpu: 1500m
           ports:
             - containerPort: 80
-
-
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30  
+            periodSeconds: 10        
+            timeoutSeconds: 5       
+            failureThreshold: 3      

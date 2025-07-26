@@ -43,9 +43,7 @@ class CreateNewUserSemesters extends Command
         // Semester 2: January 1st - April 30th (4 months)
         // Semester 3: May 1st - June 30th (2 months)
 
-        // --- START TEMPORARY CODE FOR TESTING IN JULY ---
-        // You need to ADD this block to your file for testing purposes.
-        // REMOVE THIS BLOCK AFTER TESTING IS COMPLETE!
+
         if (now()->month === 7) { // If current month is July
             $semesterDetails = [
                 'type' => 99, // Using a unique 'type' like 99 to signify a test semester
@@ -85,7 +83,7 @@ class CreateNewUserSemesters extends Command
             return Command::FAILURE; // The command exits here if it's not a semester start month
         }
 
-        // Fetch all users who are students (roleID = 1)
+
         $students = User::where('roleID', 1)->get();
 
         $countCreated = 0;
@@ -94,12 +92,11 @@ class CreateNewUserSemesters extends Command
         foreach ($students as $user) {
             DB::beginTransaction();
             try {
-                // Determine the next semester number for this specific user
+             
                 $latestUserSemester = $user->userSemesters()->orderBy('semester_number', 'desc')->first();
                 $nextSemesterNumber = ($latestUserSemester ? $latestUserSemester->semester_number : 0) + 1;
 
-                // Check if a UserSemester record for this specific academic period
-                // (defined by start and end dates) already exists for the user.
+
                 $existingUserSemesterForPeriod = UserSemester::where('userID', $user->id)
                                                             ->whereDate('start_date', $semesterDetails['start_date'])
                                                             ->whereDate('end_date', $semesterDetails['end_date'])
@@ -108,22 +105,22 @@ class CreateNewUserSemesters extends Command
                 if ($existingUserSemesterForPeriod) {
                     $this->comment("Skipping user {$user->id}: UserSemester for {$semesterDetails['start_date']->format('Y-m-d')} to {$semesterDetails['end_date']->format('Y-m-d')} already exists.");
                     $countSkipped++;
-                    DB::rollBack(); // Rollback if transaction started and skipped
-                    continue; // Skip to next user
+                    DB::rollBack(); 
+                    continue; 
                 }
 
-                // Get the user's current specialization to carry it over to the new semester record
+      
                 $userSpecializationID = $user->userSemesters()->orderBy('id', 'desc')->first()->SpecializationID ?? null;
 
                 UserSemester::create([
                     'userID' => $user->id,
-                    'SpecializationID' => $userSpecializationID, // Carry over their specialization
+                    'SpecializationID' => $userSpecializationID, 
                     'start_date' => $semesterDetails['start_date'],
                     'end_date' => $semesterDetails['end_date'],
                     'semester_number' => $nextSemesterNumber,
-                    'semester_hours' => 0, // Reset hours for the new semester's tracking
-                    'year_degree' => 0,    // Reset degree for the new semester's tracking
-                    'has_registered_subjects' => false, // Crucial: Allow registration for this new semester
+                    'semester_hours' => 0, 
+                    'year_degree' => 0,   
+                    'has_registered_subjects' => false, 
                 ]);
 
                 $this->info("Created UserSemester for user ID: {$user->id}, Semester Number: {$nextSemesterNumber} (Type: {$semesterDetails['type']})");
