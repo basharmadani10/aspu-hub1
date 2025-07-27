@@ -5,9 +5,41 @@ pipeline {
         IMAGE_NAME    = "bm106/aspu-api"
         SONARQUBE_ENV = "sonar"
         DOCKER_CREDS  = "dockerhub"
+        KUBE_SERVER   = 'https://167.86.111.168:6443'
+        KUBE_NAMESPACE = 'default'
     }
 
     stages {
+
+        stage('Configure Kubeconfig') {
+            steps {
+                withCredentials([string(credentialsId: 'k3s-jenkins-token-new', variable: 'KUBE_TOKEN')]) {
+                    sh '''
+                    mkdir -p ~/.kube
+                    cat <<EOF > ~/.kube/config
+apiVersion: v1
+kind: Config
+clusters:
+- cluster:
+    server: ${KUBE_SERVER}
+    insecure-skip-tls-verify: true
+  name: k3s
+contexts:
+- context:
+    cluster: k3s
+    namespace: ${KUBE_NAMESPACE}
+    user: jenkins
+  name: jenkins-context
+current-context: jenkins-context
+users:
+- name: jenkins
+  user:
+    token: ${KUBE_TOKEN}
+EOF
+                    '''
+                }
+            }
+        }
 
         stage('SonarQube Analysis') {
             steps {
@@ -19,7 +51,6 @@ pipeline {
                             -Dsonar.projectName=ASPU-API \
                             -Dsonar.projectVersion=1.0 \
                             -Dsonar.sources=."
-
                     }
                 }
             }
@@ -58,7 +89,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh "kubectl set image deployment/aspu-api aspu-api=${IMAGE_NAME}:${BUILD_NUMBER}"
+                sh "kubectl set image deployment/aspu-api aspu-api=${IMAGE_NAME}:${BUILD_NUMBER} -n ${KUBE_NAMESPACE}"
             }
         }
     }
