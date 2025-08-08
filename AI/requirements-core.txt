@@ -1,0 +1,7 @@
+# الأساسيات المطلوبة للتشغيل
+flask==2.3.2
+flask-cors==3.0.10
+python-dotenv==1.1.0
+huggingface-hub==0.32.2
+sentence-transformers==4.1.0
+chromadb==0.4.22

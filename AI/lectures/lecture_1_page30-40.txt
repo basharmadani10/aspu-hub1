@@ -1,0 +1,238 @@
+--رقم الصفحة:-- 30
+```markdown
+# Queries
+
+*   Free text to express user's **information need**
+*   Same information need can be described by different queries
+    *   Are chatting Apps secure?
+    *   Live chat protection
+    *   Breaches in online chat
+*   Same query can represent different inf
+    *   Apple
+    *   Jaguar
+
+## Image Descriptions
+
+Image 1: The image shows a real, red apple with a green leaf attached to its stem.
+
+Image 2: The image shows the logo of Apple, a gray, stylized apple shape with a bite taken out of it.
+
+Image 3: The image shows the face of a jaguar, a large cat with distinctive spots.
+
+Image 4: The image shows a black Jaguar car speeding on a road.
+
+## Questions
+
+(No questions present on the page)
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 31
+```markdown
+# Queries – different forms
+
+* Web search e.g.: keywords, narrative ...
+* Image search e.g. keywords, sample image
+* QA e.g. question
+* Music search e.g. humming a tune
+* Filtering/recommendation e.g. user's interest/history
+* Scholar search e.g. structured (author, title ..)
+* Advanced search
+* #wsyn(0.9 #field (title, #phrase (homer,simpson)) 0.7 #and (#> (pagerank,3), #ow3 (homer,simpson)) 0.4 #passage (homer, simpson, dan, castellaneta))
+
+## Image Descriptions
+
+Image 1: The image is a textbook page with the title "Queries – different forms". It lists different types of queries with examples, such as "Web search e.g.: keywords, narrative ...", "Image search e.g. keywords, sample image", and "Advanced search". The page is designed with a dark brown border.
+
+## Questions
+
+(None found on the page)
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 32
+```markdown
+# Relevance
+
+does item d match query q? ... or ...
+
+is item d relevant to query q?
+
+Relevance is a tricky notion
+
+will the user like it / click on it?
+
+will it help the user achieve a task? (satisfy information need)
+
+is it novel (not redundant)?
+
+Relevance and similarity
+
+i.e. d,q share similar “meaning”
+
+about the same topic / subject / issue
+
+## Image Descriptions
+
+Image 1: The image is a textbook page titled "Relevance". It lists different interpretations and factors influencing relevance, such as matching a query, user preference, novelty, and similarity. It's presented in a simple, bullet-point style.
+
+## Questions
+
+(None)
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 33
+```markdown
+# Information Need/Query/Relevance
+
+*   Information need
+    *   Topic about which the user desires to know more
+    *   In the user's mind!
+
+*   Query
+    *   What the user conveys to the computer
+    *   Considered one representation of the information need
+
+*   Relevance
+    *   Document having a value with respect to the information need
+    *   i.e., a document is relevant if it satisfies the information need
+
+## Image Descriptions
+Image 1: The image is a textbook page discussing "Information Need/Query/Relevance". It contains bullet points explaining the concepts of information need, query and relevance, including details such as the user's desires and the relationship between documents and information needs.
+
+## Questions
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 34
+```markdown
+# A central problem in search
+
+## Searcher
+
+Searcher
+
+?
+
+Concepts
+
+Query Terms
+
+Matching document terms to query terms
+
+## Autho
+
+Autho
+
+SHAKESPEARE
+
+Concepts
+
+Document Terms
+
+Do these represent the same concepts?
+
+## Image Descriptions
+
+Image 1: A diagram depicting the challenge of matching search queries to documents. On the left, a cartoon stick figure labeled "Searcher" has a question mark in a thought bubble, representing their concepts. An arrow points down to "Query Terms". On the right, a portrait of William Shakespeare labeled "Autho", represents document concepts. An arrow points down to "Document Terms." A horizontal arrow connects the two sides, with the text "Matching document terms to query terms" above it. Below the arrows is the question "Do these represent the same concepts?".
+
+## Questions
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 35
+```markdown
+# Main Heading
+
+What is the challenge in relevance?
+
+*   No clear semantics!
+    *   “William Shakespeare”
+    *   Author history's? list of plays? a play by him?
+*   Inherent ambiguity of language!
+    *   polysemy: “Apple”, “Jaguar”
+*   Relevance is highly subjective!
+    *   Rel: yes/no, Rel: perfect/excellent/good/fair/bad
+
+## Image Descriptions
+
+Image 1: The image is of a textbook page. The page is about the challenge in relevance and lists three main points: no clear semantics, inherent ambiguity of language, and relevance is highly subjective, each with further sub-points. The background behind the page is dark brown.
+
+## Questions
+
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 36
+```markdown
+# Main Heading
+
+Information Retrieval (IR) is ...
+
+# Subheading
+
+Finding material (usually documents) of an unstructured nature (usually text) that satisfies an information need from within large collections
+
+## Image Descriptions
+
+Image 1: The image is a textbook page defining Information Retrieval (IR). It features a title "Information Retrieval (IR) is..." followed by a definition: "Finding material (usually documents) of an unstructured nature (usually text) that satisfies an information need from within large collections." The definition is contained within a brown rectangular box. The background is a textured white with a thin brown border. The page number "۳۷" is located at the bottom right corner.
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 37
+```markdown
+# Main Heading
+
+IR vs DB vs NLP vs ML
+
+---
+
+IR == DB?
+
+---
+
+## Image Descriptions
+
+Image 1: The image is a slide from a presentation or textbook page. It features the title "IR vs DB vs NLP vs ML" at the top. Below a horizontal line, there's a brown box containing the question "IR == DB?". The background is a textured white color, and the slide has a brown border. The overall theme appears to be comparing different fields such as Information Retrieval (IR), Databases (DB), Natural Language Processing (NLP), and Machine Learning (ML).
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 38
+```markdown
+# Main Heading
+
+IR is NOT "DB"
+
+## Table Content
+
+|                    | DB                                                                                                                                                           | IR                                                                           |
+|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
+| What we're retrieving | Structured data. Clear semantics based on a formal model.                                                                                                   | Mostly unstructured. Free text with some metadata.                        |
+| Queries we're posing | Formally-defined (relational algebra, SQL). Unambiguous.                                                                                                | Free text ("natural language"), Boolean                                   |
+| Results we get       | Exact (always "correct”)                                                                                                                                      | Imprecise (need to measure effectiveness)                                    |
+| Interaction with system | One-shot queries                                                                                                                                                 | Interaction is important                                                     |
+
+## Image Descriptions
+
+Image 1: The image is a table comparing Information Retrieval (IR) and Databases (DB) along different dimensions such as the nature of data retrieved, types of queries, nature of results, and interaction patterns with the system. The comparison highlights the structured nature of DB and the unstructured nature of IR, as well as the exactness of results in DB versus the need for effectiveness measurement in IR.
+
+## Footnotes
+
+۳۹
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 39
+```markdown
+# IR vs DB vs NLP vs ML
+
+## Image Descriptions
+
+Image 1: The image depicts a slide from a presentation or textbook. The slide's title is "IR vs DB vs NLP vs ML". A line visually separates the title from a question in a brown rounded-edge rectangle, which reads "IR == NLP?". The slide appears to be an introductory or conceptual slide, possibly comparing or contrasting different fields.
+
+## Questions
+IR == NLP?
+```
+-----------------------------------------
+

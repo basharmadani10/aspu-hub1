@@ -1,0 +1,245 @@
+--رقم الصفحة:-- 50
+```markdown
+# Boolean Retrieval Model
+
+*   Queries: Users express queries as a Boolean expression
+    *   AND, OR, NOT
+    *   Can be arbitrarily nested
+    *   Ex. query: information AND retrieval AND NOT technology
+*   Documents: Views each document as a “bag” of words
+*   Return only documents that satisfy the Boolean query.
+
+## Image Descriptions
+
+Image 1: The image displays a textbook page about the Boolean Retrieval Model. It describes how users express queries and how documents are viewed in this model.
+
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 51
+```markdown
+# Exercise
+
+*   Build a Term-Document Incidence Matrix
+    *   Which term appears in which document
+    *   Rows are terms
+    *   Columns are documents
+*   Given example collection:
+    *   d1: He likes to play, he likes to eat
+    *   d2: He likes to eat, and eat, and eat
+    *   d3: The thing he likes to eat is apple
+    *   d4: The apple he likes to eat is red
+    *   d5: He likes to play, and eat red apple
+
+|      | d1 | d2 | d3 | d4 | d5 |
+| ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
+| he      | 1       | 1       | 1       | 1       | 1       |
+| likes   | 1       | 1       | 1       | 1       | 1       |
+| to      | 1       | 1       | 1       | 1       | 1       |
+| play    | 1       | 0       | 0       | 0       | 1       |
+| eat     | 1       | 1       | 1       | 1       | 1       |
+| and     | 0       | 1       | 0       | 0       | 1       |
+| the     | 0       | 0       | 1       | 1       | 0       |
+| thing   | 0       | 0       | 1       | 0       | 0       |
+| is      | 0       | 0       | 1       | 1       | 0       |
+| apple   | 0       | 0       | 1       | 1       | 1       |
+| red     | 0       | 0       | 0       | 1       | 1       |
+
+## Image Descriptions
+
+Image 1: The image contains a term-document incidence matrix. The matrix shows the frequency of terms (he, likes, to, play, eat, and, the, thing, is, apple, red) in different documents (d1, d2, d3, d4, d5). The page provides an exercise to build such matrix from a given example collection of documents.
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 52
+```markdown
+# Term-Document Incidence Matrix
+
+## Table: Term-Document Matrix
+
+|       | d1 | d2 | d3 | d4 | d5 |
+| :---- | :- | :- | :- | :- | :- |
+| he    | 1  | 1  | 1  | 1  | 1  |
+| likes | 1  | 1  | 1  | 1  | 1  |
+| to    | 1  | 1  | 1  | 1  | 1  |
+| play  | 1  | 0  | 0  | 0  | 1  |
+| eat   | 1  | 1  | 1  | 1  | 1  |
+| and   | 0  | 1  | 0  | 0  | 1  |
+| the   | 0  | 0  | 1  | 1  | 0  |
+| thing | 0  | 0  | 1  | 0  | 0  |
+| is    | 0  | 0  | 1  | 1  | 0  |
+| apple | 0  | 0  | 1  | 1  | 1  |
+| red   | 0  | 0  | 0  | 1  | 1  |
+
+## Notes
+
+1 if document contains term, 0 otherwise
+
+## Image Descriptions
+
+### Image 1: Term-Document Incidence Matrix
+The image shows a term-document incidence matrix, a table that represents the presence or absence of terms within a set of documents. The rows represent the terms ("he", "likes", "to", etc.), and the columns represent the documents (d1, d2, d3, d4, d5). A '1' in a cell indicates that the corresponding term is present in the corresponding document, while a '0' indicates that it is absent. The matrix is labeled with "TERMS" on the left and "Documents" above.
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 53
+```markdown
+# Term-Document Incidence Matrix
+
+|       | d1 | d2 | d3 | d4 | d5 |
+| :---- | :-: | :-: | :-: | :-: | :-: |
+| he    | 1  | 1  | 1  | 1  | 1  |
+| likes | 1  | 1  | 1  | 1  | 1  |
+| to    | 1  | 1  | 1  | 1  | 1  |
+| play  | 1  | 0  | 0  | 0  | 1  |
+| eat   | 1  | 1  | 1  | 1  | 1  |
+| and   | 0  | 1  | 0  | 0  | 1  |
+| the   | 0  | 0  | 1  | 1  | 0  |
+| thing | 0  | 0  | 1  | 0  | 0  |
+| is    | 0  | 0  | 1  | 1  | 0  |
+| apple | 0  | 0  | 1  | 1  | 1  |
+| red   | 0  | 0  | 0  | 1  | 1  |
+
+Query: play AND eat AND NOT apple
+Apply on rows: 10001 AND 11111 AND !(00111) = 10000
+
+## Image Descriptions
+
+Image 1: The image displays a term-document incidence matrix. The rows represent terms like "he", "likes", "to", "play", "eat", etc. The columns represent documents labeled "d1" through "d5". The cells contain either a 1 or a 0, indicating the presence or absence of a term in a specific document.  There are also two curved arrows pointing from the column "d1" towards the bottom right corner of the table. Below the table, a query and its application on the rows is given.
+
+## Questions
+
+(None)
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 54
+```markdown
+# Boolean Retrieval Model
+
+*   Any given query divides the collection into two sets:
+    *   retrieved (matching)
+    *   not-retrieved (not matching)
+*   Returns a set of documents that "exactly" satisfy the query (Boolean expression)
+    *   Called "Exact-Match" retrieval
+*   Used?
+    *   Many search systems still in-use are Boolean
+    *   e.g., Email, library catalog, Mac OS X Spotlight, legal search
+
+## Image Descriptions
+
+Image 1: A textbook page with the title "Boolean Retrieval Model". The page lists properties and examples related to the Boolean retrieval model in information retrieval.
+
+## Questions
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 55
+```markdown
+# Textbook Page Content
+
+## Main Heading
+Google?
+
+## Section: Advanced Search
+Advanced Search
+
+## Section: Find Pages With...
+Find pages with...
+
+all these words:
+
+this exact word or phrase:
+
+any of these words:
+
+none of these words:
+
+numbers ranging from:
+to
+
+## Section: To do this in the search box.
+To do this in the search box.
+
+Type the important words: tri-colour rat terrier
+
+Put exact words in quotes: "rat terrier"
+
+Type OR between all the words you want: miniature OR standard
+
+Put a minus sign just before words that you don't want:
+-rodent, -"Jack Russell"
+
+Put two full stops between the numbers and add a unit of
+measurement: 10..35 kg, £300..£500, 2010..2011
+
+## Image Descriptions
+Image 1: The image shows a textbook page about using Google's advanced search functions. It displays the interface for advanced search options and provides instructions on how to formulate specific queries. The background is a wooden texture.
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 56
+```markdown
+# Main Section
+
+## Bigger Collections
+
+Consider N = 1 million documents, each with about 1000 words.
+
+Say there are M = 500K distinct terms among these.
+
+500K x 1M matrix has half-a-trillion O's and 1's.
+
+But it has no more than one billion 1's.
+
+matrix is extremely sparse.
+
+What's a better representation?
+
+## Image Descriptions
+
+Image 1: The image is of a textbook page on a white background with a brown border. The page's title is "Bigger Collections". The page lists several points about a large document collection and ends with the question "What's a better representation?".
+
+## Questions
+
+(None)
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 57
+```markdown
+# Textbook Page Content
+
+## Image Descriptions
+
+Image 1: A photograph shows the words "WHAT'S NEXT?" painted in dark gray on a light-colored surface. The surface appears to be concrete or stone, and the background is blurred, showing what looks like dry vegetation or twigs. The image serves as a visual prompt or title for the content below.
+
+## Main Content
+
+Will Term-Doc Incidence Matrix “works” for large collections?
+
+If not, how can we make retrieval efficient?
+
+How documents are preprocessed?
+
+Is “Car” == “Cars”?
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 58
+```markdown
+# Main Content
+
+Thank you for Attention
+Afaf Al Shalaby, Ph.D.
+
+?
+
+09
+
+## Image Descriptions
+
+Image 1: The image shows a brown background with the text "Thank you for Attention Afaf Al Shalaby, Ph.D." in white. Below the text is a large question mark symbol in a dark brown color. In the bottom right corner there is the number "09" in a small font.
+```
+-----------------------------------------
+

@@ -1,0 +1,285 @@
+---Page Number:-- 10
+```markdown
+# IRS Application -4-
+
+* Text classification:
+
+## Image Description
+
+Image 1: An illustration showing IRS -4- application for text classification. The image shows raw text data files branching into three categories: Technology, Sports, and Fashion.
+
+```
+-----------------------------------------
+
+---Page Number:-- 11
+```markdown
+# Information Retrieval Systems Application -5-
+
+## Image Description
+
+Image 1: Displays search results from ExpertSearch.co.uk, showing names, workplaces, and job descriptions of several experts.
+
+Image 2: Shows a screenshot from Samuel Ginn College of Engineering website, with a faculty member and expertise search engine.
+
+Image 3: Displays an explanation of the "Expert Search" feature indicating the search for experts rather than documents in a specific field.
+
+---
+
+Expert Search:
+
+Search for people (not documents) who are experts in a specific field and in a specific community with high confidence.
+
+EXPERT SEARCH.CO.UK
+
+There are 9 records matching your search request:
+
+Area of Expertise: Information Retrieval
+
+Your search took 0.260 seconds to perform.
+
+Name: Mr John Alcock
+
+Town/County: London
+
+Organisation: Bristows, Solicitors
+
+Occupation: Solicitor and European Patent/Trade Mark Attorney
+
+Name: Mr Matthew Attia
+
+Town/County: Wigan, Lancs
+
+Organisation: Independent Drug Monitoring Unit (IDMU)
+
+Occupation: Drug Abuse Research & Information Consultant
+
+Name: Miss Annette Clarey
+
+Town/County: Slough, Berks
+
+Organisation: BioMark Forensics Ltd
+
+Occupation: Forensic Biologist
+
+Name: Mr Andrew Fox
+
+Town/County: Plymouth, Devon
+
+Organisation: Audax Digital Forensic
+
+Occupation: Computer Forensic Consultant
+
+FROMARK FORENSICS
+
+SAMUEL GINN
+COLLEGE OF ENGINEERING
+
+Faculty Expertise - Search
+
+Auburn Engineering Faculty Search Engine
+
+Computer Science and Software Engineering
+
+Information retrieval
+
+ANNAE GIBERT
+
+M.K. CARLISLE
+12
+```
+-----------------------------------------
+
+---Page Number:-- 12
+```markdown
+# IRS Application -6-
+
+Speech Search:
+
+Search for audio clips, not texts.
+
+## Image Description
+
+Image 1: Various images showing different scenarios such as a TV show, an Oprah interview, a business meeting, and a smartphone app. It appears the application may be related to voice search or audio files.
+```
+-----------------------------------------
+
+---Page Number:-- 13
+```markdown
+# Information Retrieval System Application -7-
+
+* Conversational Search:
+* Automated answering of user questions in automated dialogue systems
+
+## Image Description
+
+Image 1: An illustration showing a person talking to a robot, representing the concept of human-machine conversation.
+
+Image 2: An image of a smartphone displaying a virtual assistant interface, where the assistant asks "What can I help you with?"
+
+```
+-----------------------------------------
+
+---Page Number:-- 14
+```markdown
+# IRS Application -8-
+
+## Image Description
+
+Image 1: Displays a screenshot of the "Who to follow" section on Twitter, showing suggested accounts to follow like "Sky News Arabia" and other accounts.
+
+Image 2: Shows a screenshot of the "Recommended for You" section on Amazon, displaying various products like books and Google applications.
+
+Image 3: Displays a screenshot of the "Customers who viewed this item also viewed" section on Amazon, showing a collection of books related to deep learning and artificial intelligence.
+
+Recommendation :
+Recommendations,
+whether tracking people
+or recommending certain
+products.
+
+Who to follow Refresh - View all
+sky Sky News Arabia @skyne... x
+NEWS Arabia
+Follow
+
+boushra al-shehri @Bous... x
+Follow
+
+Followed by Kareem Darwish and
+others
+
+Majd Abbar @majdat
+Follow
+
+amazon.com
+Recommended for You
+Amazon.com has new recommendations for you based on items you purchased or told us you own.
+
+Customers who viewed this item also viewed```
+-----------------------------------------
+
+---Page Number:-- 15
+```markdown
+# IRS Application -9-
+# Things on Search Results Page!
+
+## Image Description
+
+Image 1: The image shows a Google search results screenshot for "haii". Several red circles highlight different features on the search results page, including query suggestions/corrections, summary snippets, and search categories. The right side of the image displays "Sponsored Search" ads.
+
+## Content
+
+Web Images Videos Maps News Shopping Gmail more -
+
+Google hati
+
+*   history of hati
+*   pictures of hati
+*   haitian culture
+*   hati climate
+*   hati economy
+Republic of hati
+*   hati food
+*   hati population
+*   hati poverty
+Welcome to the hati weather
+*   facts about h
+
+Search
+
+Sponsored Search
+
+Results 1-10 of about 32,890,000 for hati (0.32
+
+Latest News on Haiti
+
+Haiti Earthquake Relief
+
+Earthquake in Haiti
+
+Global Disasters Maps
+
+Aid Haiti Quake Victims
+
+Haiti News Summary
+```
+-----------------------------------------
+
+---Page Number:-- 16
+```markdown
+# Information Retrieval System Application -10-
+
+## Image Description
+
+Image 1: The image displays screenshots of different search results and visual information displays, likely demonstrating various ways to present search results.
+
+## Content
+
+Information Visualization:
+How to display search results so that the user can benefit from these results in the best way
+
+17
+```
+-----------------------------------------
+
+---Page Number:-- 17
+```markdown
+# What is IRS?
+
+IR is about technology
+to connect people to information
+
+## Image Description
+
+Image 1: The page displays a title "What is IRS?" with a green text box below it containing the text "IR is about technology to connect people to information".
+```
+-----------------------------------------
+
+---Page Number:-- 18
+```markdown
+# Who Uses Information Retrieval Systems?
+
+## Image Description
+
+Image 1: A picture showing a couple using a laptop computer.
+
+Image 2: A picture showing a group of children using a laptop computer.
+
+Image 3: A picture showing a person sitting at a desk with a computer and several papers.
+
+Image 4: A picture showing people using computers in a library.
+
+Image 5: A picture showing a soldier using a computer in a desert area.
+
+Image 6: A picture showing an engineer using a tablet in front of a building.
+
+Image 7: A picture showing a man talking on a mobile phone.
+```
+-----------------------------------------
+
+---Page Number:-- 19
+```markdown
+# Course Organization
+
+Duration & Daily Schedule
+*   3 “intensive” months!
+*   Every Sunday and Tuesday from today (Sunday November 21th) to Sunday January 26th
+
+| Time                     | Activity                     |
+| ------------------------ | ---------------------------- |
+| On Sunday 8:00 am-11:00 am | Lecture Part 1, Lecture Part 2 |
+| On Tuesday 8:00 am-11:00 am | Lecture Part 1, Lecture Part 2 |
+| On Sunday 12:30 pm-02:00 pm | Practical Session            |
+| On Sunday 02:00 pm-03:00 pm | Practical Session            |
+| On Tuesday 12:30 pm-02:00 pm | Practical Session            |
+| On Tuesday 02:00 pm-03:00 pm | Practical Session            |
+
+۲۰
+
+
+## Image Description
+
+Image 1: The page displays information about course organization. It specifies the course duration and daily schedule including days and times for lectures and practical sessions.
+```
+-----------------------------------------
+

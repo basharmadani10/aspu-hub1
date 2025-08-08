@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY student_assistant.py .
+COPY utils/ ./utils/
+COPY prompts/ ./prompts/
+
+COPY lectures/ ./lectures/
+
+
+EXPOSE 9000
+
+CMD ["python", "student_assistant.py"]

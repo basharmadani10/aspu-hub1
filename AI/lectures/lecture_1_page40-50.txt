@@ -1,0 +1,450 @@
+--رقم الصفحة:-- 40
+```markdown
+# Main Heading
+
+IR is NOT "NLP"!
+
+## Image Descriptions
+
+Image 1: The image shows a slide from a presentation or textbook page. It has the title "IR is NOT NLP!". Below the title, two rounded rectangular boxes labeled "(NLP)" and "(IR)" are connected by two green arrows pointing in opposite directions. Underneath the boxes is a purple banner containing the quote: "IR makes NLP useful. NLP makes IR interesting." - Jimmy Lin.
+
+## Content
+
+(NLP)
+
+(IR)
+
+"IR makes NLP useful. NLP makes IR interesting.”
+- Jimmy Lin
+
+## Footer
+٤١
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 41
+```markdown
+# IR vs DB vs NLP vs ML
+
+##
+
+IR == ML?
+
+## Image Descriptions
+
+Image 1: The image shows a slide from a presentation or textbook, discussing the relationship between Information Retrieval (IR), Databases (DB), Natural Language Processing (NLP), and Machine Learning (ML). The central question posed is "IR == ML?".
+
+## Questions
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 42
+```markdown
+# Main Heading
+
+AI
+
+## Image Descriptions
+
+Image 1: A Venn diagram showing the relationships between different fields. The largest circle, in purple, represents Artificial Intelligence (AI). Inside it are overlapping circles representing Machine Learning (ML) in green, Natural Language Processing (NLP) in red, and Information Retrieval (IR) in brown. A separate, smaller circle in orange represents Databases (DB) and is outside the main AI circle. The image is visually representing that NLP, ML, and IR are subfields of AI and that they intersect. DB is shown as related but not necessarily a subfield of AI.
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 43
+```markdown
+# Main Heading
+
+Today's Roadmap
+
+## Main Section
+
+* Introduction to IR
+* How IR “sees” documents?
+* Boolean retrieval
+
+## Image Descriptions
+
+Image 1: A scenic image of a black asphalt road winding through a green, hilly landscape with trees. The road has white dashed lines. The background includes a green hill and forest. The image is situated to the right side of the text on the page.
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 44
+```markdown
+# Main Heading
+
+How IR “sees” documents?
+
+## Image Descriptions
+
+Image 1: A cartoon drawing of a man in a suit holding a newspaper.
+
+Image 2: A stack of documents, with a word cloud on top of the visible document. The words "information retrieval" are prominently displayed within the word cloud, along with other related terms like "internet," "data," and "technology."
+
+## Extracted Text Content
+
+internet
+data technology
+information
+retrieval
+storage system
+exchange
+
+٤٥
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 45
+```markdown
+# Main Heading
+
+## Bag-of-Words trick
+
+---
+
+Can you guess what this is about:
+*   per is salary hour £5,594 Neymar's
+    *   Neymar's salary per hour is £5,594
+
+*   obesity French is of full cause and fat fries
+    *   French fries is full of fat and cause obesity
+
+*   Main idea: Re-ordering doesn't destroy the topic
+    *   individual words are “building blocks"
+    *   "bag" of words: a “composition” of “meanings"
+
+---
+
+## Image Descriptions
+
+Image 1: The image is of a textbook page describing the "Bag-of-Words trick". It shows examples of how reordering words does not destroy the topic of a sentence.
+
+## Questions
+
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 46
+```markdown
+# Main Section
+
+Simplest: Bag-of-Words trick
+
+Most search engines use BOW
+
+treat documents and queries as bags of words
+
+A "bag" is a set with repetitions
+
+match = “degree of overlap” between d, q
+
+Retrieval models
+
+statistical models (functions): usually use words as features
+
+decide which documents most likely to be relevant
+
+BOW makes these models tractable (and also effective!)
+
+# Image Descriptions
+
+Image 1: The image is of a textbook page outlining the Bag-of-Words (BOW) technique used in search engines and retrieval models. It lists key aspects of the technique, such as treating documents as bags of words and defining a "bag" as a set with repetitions.
+
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 47
+```markdown
+# Retrieval Models
+
+## BOOLEAN RETRIVAL
+
+## Image Descriptions
+
+Image 1: A slide with a header "Retrieval Models". There is a block that says "BOOLEAN RETRIVAL". To the right, there are the logos of Google, Bing and Yahoo! Below the logos, there is a robot ninja.
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 48
+```markdown
+# What's the Simplest IR System?
+
+* Given a collection of documents and a "free text" query
+* How can we get some search results in a simple way?
+* grep-like: a "sequential scan"
+* Simple but ...
+    * very inefficient
+* Is it effective?
+
+How can we make it more effective
+AND efficient?
+
+٤٩
+
+## Image Descriptions
+
+Image 1: The image shows a question mark icon near the right side of the bullet point "How can we get some search results in a simple way?". The question mark visually reinforces the questioning nature of the prompt.
+
+Image 2: The image contains a text bubble that poses the question "How can we make it more effective AND efficient?". This question appears to be a follow-up or a refinement of the initial question posed on the page.
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 49
+```markdown
+# Main Heading
+
+The goal is
+
+Make your search more efficient
+and more efficient
+
+## Image Descriptions
+
+Image 1: The image shows a textbook page stating the goal is to make a search more efficient. The text "The goal is" is at the top, and "Make your search more efficient and more efficient" is in a brown oval shape in the center of the page.
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 50
+```markdown
+# Boolean Retrieval Model
+
+*   Queries: Users express queries as a Boolean expression
+    *   AND, OR, NOT
+    *   Can be arbitrarily nested
+    *   Ex. query: information AND retrieval AND NOT technology
+*   Documents: Views each document as a “bag” of words
+*   Return only documents that satisfy the Boolean query.
+
+## Image Descriptions
+
+Image 1: The image displays a textbook page about the Boolean Retrieval Model. It describes how users express queries and how documents are viewed in this model.
+
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 51
+```markdown
+# Exercise
+
+*   Build a Term-Document Incidence Matrix
+    *   Which term appears in which document
+    *   Rows are terms
+    *   Columns are documents
+*   Given example collection:
+    *   d1: He likes to play, he likes to eat
+    *   d2: He likes to eat, and eat, and eat
+    *   d3: The thing he likes to eat is apple
+    *   d4: The apple he likes to eat is red
+    *   d5: He likes to play, and eat red apple
+
+|      | d1 | d2 | d3 | d4 | d5 |
+| ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
+| he      | 1       | 1       | 1       | 1       | 1       |
+| likes   | 1       | 1       | 1       | 1       | 1       |
+| to      | 1       | 1       | 1       | 1       | 1       |
+| play    | 1       | 0       | 0       | 0       | 1       |
+| eat     | 1       | 1       | 1       | 1       | 1       |
+| and     | 0       | 1       | 0       | 0       | 1       |
+| the     | 0       | 0       | 1       | 1       | 0       |
+| thing   | 0       | 0       | 1       | 0       | 0       |
+| is      | 0       | 0       | 1       | 1       | 0       |
+| apple   | 0       | 0       | 1       | 1       | 1       |
+| red     | 0       | 0       | 0       | 1       | 1       |
+
+## Image Descriptions
+
+Image 1: The image contains a term-document incidence matrix. The matrix shows the frequency of terms (he, likes, to, play, eat, and, the, thing, is, apple, red) in different documents (d1, d2, d3, d4, d5). The page provides an exercise to build such matrix from a given example collection of documents.
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 52
+```markdown
+# Term-Document Incidence Matrix
+
+## Table: Term-Document Matrix
+
+|       | d1 | d2 | d3 | d4 | d5 |
+| :---- | :- | :- | :- | :- | :- |
+| he    | 1  | 1  | 1  | 1  | 1  |
+| likes | 1  | 1  | 1  | 1  | 1  |
+| to    | 1  | 1  | 1  | 1  | 1  |
+| play  | 1  | 0  | 0  | 0  | 1  |
+| eat   | 1  | 1  | 1  | 1  | 1  |
+| and   | 0  | 1  | 0  | 0  | 1  |
+| the   | 0  | 0  | 1  | 1  | 0  |
+| thing | 0  | 0  | 1  | 0  | 0  |
+| is    | 0  | 0  | 1  | 1  | 0  |
+| apple | 0  | 0  | 1  | 1  | 1  |
+| red   | 0  | 0  | 0  | 1  | 1  |
+
+## Notes
+
+1 if document contains term, 0 otherwise
+
+## Image Descriptions
+
+### Image 1: Term-Document Incidence Matrix
+The image shows a term-document incidence matrix, a table that represents the presence or absence of terms within a set of documents. The rows represent the terms ("he", "likes", "to", etc.), and the columns represent the documents (d1, d2, d3, d4, d5). A '1' in a cell indicates that the corresponding term is present in the corresponding document, while a '0' indicates that it is absent. The matrix is labeled with "TERMS" on the left and "Documents" above.
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 53
+```markdown
+# Term-Document Incidence Matrix
+
+|       | d1 | d2 | d3 | d4 | d5 |
+| :---- | :-: | :-: | :-: | :-: | :-: |
+| he    | 1  | 1  | 1  | 1  | 1  |
+| likes | 1  | 1  | 1  | 1  | 1  |
+| to    | 1  | 1  | 1  | 1  | 1  |
+| play  | 1  | 0  | 0  | 0  | 1  |
+| eat   | 1  | 1  | 1  | 1  | 1  |
+| and   | 0  | 1  | 0  | 0  | 1  |
+| the   | 0  | 0  | 1  | 1  | 0  |
+| thing | 0  | 0  | 1  | 0  | 0  |
+| is    | 0  | 0  | 1  | 1  | 0  |
+| apple | 0  | 0  | 1  | 1  | 1  |
+| red   | 0  | 0  | 0  | 1  | 1  |
+
+Query: play AND eat AND NOT apple
+Apply on rows: 10001 AND 11111 AND !(00111) = 10000
+
+## Image Descriptions
+
+Image 1: The image displays a term-document incidence matrix. The rows represent terms like "he", "likes", "to", "play", "eat", etc. The columns represent documents labeled "d1" through "d5". The cells contain either a 1 or a 0, indicating the presence or absence of a term in a specific document.  There are also two curved arrows pointing from the column "d1" towards the bottom right corner of the table. Below the table, a query and its application on the rows is given.
+
+## Questions
+
+(None)
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 54
+```markdown
+# Boolean Retrieval Model
+
+*   Any given query divides the collection into two sets:
+    *   retrieved (matching)
+    *   not-retrieved (not matching)
+*   Returns a set of documents that "exactly" satisfy the query (Boolean expression)
+    *   Called "Exact-Match" retrieval
+*   Used?
+    *   Many search systems still in-use are Boolean
+    *   e.g., Email, library catalog, Mac OS X Spotlight, legal search
+
+## Image Descriptions
+
+Image 1: A textbook page with the title "Boolean Retrieval Model". The page lists properties and examples related to the Boolean retrieval model in information retrieval.
+
+## Questions
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 55
+```markdown
+# Textbook Page Content
+
+## Main Heading
+Google?
+
+## Section: Advanced Search
+Advanced Search
+
+## Section: Find Pages With...
+Find pages with...
+
+all these words:
+
+this exact word or phrase:
+
+any of these words:
+
+none of these words:
+
+numbers ranging from:
+to
+
+## Section: To do this in the search box.
+To do this in the search box.
+
+Type the important words: tri-colour rat terrier
+
+Put exact words in quotes: "rat terrier"
+
+Type OR between all the words you want: miniature OR standard
+
+Put a minus sign just before words that you don't want:
+-rodent, -"Jack Russell"
+
+Put two full stops between the numbers and add a unit of
+measurement: 10..35 kg, £300..£500, 2010..2011
+
+## Image Descriptions
+Image 1: The image shows a textbook page about using Google's advanced search functions. It displays the interface for advanced search options and provides instructions on how to formulate specific queries. The background is a wooden texture.
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 56
+```markdown
+# Main Section
+
+## Bigger Collections
+
+Consider N = 1 million documents, each with about 1000 words.
+
+Say there are M = 500K distinct terms among these.
+
+500K x 1M matrix has half-a-trillion O's and 1's.
+
+But it has no more than one billion 1's.
+
+matrix is extremely sparse.
+
+What's a better representation?
+
+## Image Descriptions
+
+Image 1: The image is of a textbook page on a white background with a brown border. The page's title is "Bigger Collections". The page lists several points about a large document collection and ends with the question "What's a better representation?".
+
+## Questions
+
+(None)
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 57
+```markdown
+# Textbook Page Content
+
+## Image Descriptions
+
+Image 1: A photograph shows the words "WHAT'S NEXT?" painted in dark gray on a light-colored surface. The surface appears to be concrete or stone, and the background is blurred, showing what looks like dry vegetation or twigs. The image serves as a visual prompt or title for the content below.
+
+## Main Content
+
+Will Term-Doc Incidence Matrix “works” for large collections?
+
+If not, how can we make retrieval efficient?
+
+How documents are preprocessed?
+
+Is “Car” == “Cars”?
+```
+-----------------------------------------
+
+--رقم الصفحة:-- 58
+```markdown
+# Main Content
+
+Thank you for Attention
+Afaf Al Shalaby, Ph.D.
+
+?
+
+09
+
+## Image Descriptions
+
+Image 1: The image shows a brown background with the text "Thank you for Attention Afaf Al Shalaby, Ph.D." in white. Below the text is a large question mark symbol in a dark brown color. In the bottom right corner there is the number "09" in a small font.
+```
+-----------------------------------------
+

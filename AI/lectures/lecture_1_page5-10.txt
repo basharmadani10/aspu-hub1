@@ -1,0 +1,114 @@
+---Page Number:-- 1
+```markdown
+# Main Content  
+
+Goals -4-  
+
+Search engines allow us to search for information automatically.  
+
+*   Speed of searching  
+*   Quality of sources  
+*   Reducing the cost of searching  
+*   Access to very large amounts of information  
+
+6  
+
+## Image Description  
+
+Image 1: The image shows a robot standing in front of a library filled with files. The robot illustrates the importance of search engines in accessing information.  
+```
+-----------------------------------------
+
+---Page Number:-- 2
+```markdown
+# Goals  
+
+Goals -5-  
+
+Search Engines  
+changed the world!  
+
+IR is the field that  
+changed the world!  
+
+Information retrieval  
+systems are the  
+technology or science  
+behind search engines.  
+
+v  
+
+## Image Description  
+
+Image 1: The page displays a presentation slide titled "Goals -5-". The slide contains two green text boxes with the phrases "Search Engines changed the world!" and "IR is the field that changed the world!". Additionally, there is text indicating that information retrieval systems are the technology or science behind search engines.  
+```
+-----------------------------------------
+
+---Page Number:-- 3
+```markdown
+# Application of Information Retrieval Systems
+
+IR is NOT just
+
+Google
+
+What are the applications of
+information retrieval systems in
+our daily life?
+
+Information retrieval is not just
+Google
+
+B
+facebook
+f
+
+## Image Description
+
+Image 1: An image showing the word "Google" in its distinctive colors with the phrase "IR is NOT just" to illustrate that information retrieval is not just Google.
+
+Image 2: An image containing a collection of social media icons arranged in a Rubik's cube format to demonstrate applications of information retrieval.
+
+## Questions
+
+What are the applications of
+information retrieval systems in
+our daily life?
+
+Information retrieval is not just
+Google
+```
+-----------------------------------------
+
+---Page Number:-- 4
+```markdown
+# Application of Information Retrieval Systems -2-
+
+IR is NOT just the search box!
+
+Not just a text search on Google.
+
+## Image Description
+
+Image 1: The image shows a screenshot of Google's search interface. The interface displays the Google logo and search bar. This visual representation aims to emphasize that information retrieval is not just simple use of a search engine like Google.
+```
+-----------------------------------------
+
+---Page Number:-- 5
+```markdown
+# Information Retrieval System Application -3-  
+
+## Image Description  
+
+Image 1: An illustration showing the term "Social Media" magnified through a magnifying glass, highlighting its importance.  
+
+Image 2: A screenshot of Twittorati displaying various links such as popular tweets, blogs, and latest images.  
+
+* microblog search:  
+
+* Search micro blogs  
+
+* like search social media  
+```
+-----------------------------------------
+

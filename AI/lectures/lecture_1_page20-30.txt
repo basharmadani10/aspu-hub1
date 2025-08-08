@@ -1,0 +1,214 @@
+---Page Number:-- 20
+```markdown
+## Image Description
+
+Image 1: The image is a close-up shot of a wall clock. On the clock face there's text saying "come on time" in black and red colors. The minute hand is pointing slightly late. The background consists of a wooden surface.
+```
+-----------------------------------------
+
+---Page Number:-- 21
+```markdown
+# References
+
+* Lecture slides
+* Readings
+    * Introduction to Information Retrieval, by C. Manning, P. Raghavan, and H. Schütze, 2008.
+    * Search Engines: Information Retrieval in Practice, by W. Bruce Croft, D. Metzler, and T. Strohman, 2010.
+    * An introduction to Neural Information Retrieval, by Bhaskar Mitra and Nick Craswell, 2018.
+    * Pretrained Transformers for Text Ranking: BERT and Beyond, by Jimmy Lin, Rodrigo Nogueira, and Andrew Yates, 2020.
+* Lab notebooks
+
+## Image Description
+
+Image 1: The page displays a list of reference materials, including slide presentations, academic papers, and lab notebooks.
+```
+-----------------------------------------
+
+---Page Number:-- 22
+```markdown
+# Prerequisites
+
+* No prior knowledge of IR is required.
+* At least, undergrad-level courses
+    * Programming (Python)
+    * Data structures or Algorithms
+    * Basic Probability theory
+    * Basic Linear algebra
+
+## وصف الصورة
+
+## Image Description
+
+Image 1: The page is a textbook presentation slide. The slide displays a main heading "Prerequisites" followed by a list of additional requirements.
+```
+-----------------------------------------
+
+---Page Number:-- 23
+```markdown
+# Today's Plan
+
+* Introduction to IR
+* How IR "sees" documents?
+* Boolean retrieval
+
+## Image Description
+
+Image 1: The image shows a winding black road passing through a green landscape. The road could represent today's plan.
+```
+-----------------------------------------
+
+---Page Number:-- 24
+```markdown
+# Introduction to IR  
+
+## Image Description  
+
+Image 1: The image displays a collection of old search engine logos such as Yahoo, MSN, AOL, Excite, Lycos, and Altavista.  
+```
+-----------------------------------------
+
+---Page Number:-- 25
+```markdown
+# Information Retrieval Concept
+
+## IR in a nutshell
+
+## Image Description
+
+Image 1: An illustration showing the information retrieval process. The image displays a set of documents, a query being sent to a search engine, and relevant documents being retrieved. There is also a drawing of a person standing next to a large question mark.
+```
+-----------------------------------------
+
+---Page Number:-- 26
+```markdown
+# Page Title  
+
+IR, basic form  
+
+Given Query q, find relevant documents ?  
+
+search results D  
+
+# Image Description  
+
+## Image Description  
+
+Image 1: The page shows a screenshot of Google search results for "donald trump". The image displays the search interface with the search box containing the phrase "donald trump". It shows various search results including news, videos, and website links such as Donald Trump's biography and his Twitter account. The image also displays pictures of Donald Trump and brief information about him. The image demonstrates a basic example of the information retrieval process.  
+
+# Content  
+
+Google donald trump  
+
+All News Images Maps More Settings Tools  
+
+About 293,000,000 results (0.79 seconds)  
+
+Top stories  
+
+Trump on Irma: 'We've never seen anything like this'  
+
+CNN.com 1 hour ago  
+
+→ More for donald trump  
+
+Bound to No Party. Trump Upends 150 Years of Two-Party Rule  
+
+The New York Times 19 h  
+
+Hurricane Irma: Florida Keys hit by 'most catastrophic storm ever' - latest news  
+
+The Telegraph 20 mins ago  
+
+Donald Trump Biography. Trump Organization Hotel's Real Estate Golf...  
+
+www.trump.com/biography/  
+
+Donald J. Trump is the very definition of the American success story, continually setting the standards of excellence while expanding his interests in real estate,...  
+
+Donald J. Trump (@realDonaldTrump) . Twitter  
+
+https://twitter.com/realDonaldTrump  
+
+Donald Trump  
+
+45th U.S. President  
+
+donaldtrump.com  
+
+Donald John Trump is the 45th and current President of the United States, in office since January 20, 2017. Before entering politics, he was a businessman and television personality. Wikipedia  
+
+Born: June 14, 1946 (age 71), Jamaica Hospital Medical Center  
+
+Height: 1.88 m  
+
+Net worth: 3.5 billion USD (2017) Forbes  
+
+Spouse: Melania Trump (m. 2005), Marla Maples (m. 1993-1999), Ivana Trump (m. 1977-1992)  
+
+Education: Wharton School of the University of Pennsylvania (1968),  
+
+MORE  
+```
+-----------------------------------------
+
+---Page Number:-- 27
+```markdown
+# Main Content
+
+Two main issues in IR
+
+About 293,000,000 results 0.79 seconds
+
+Effectiveness  
+need to find relevant documents  
+needle in a haystack  
+very different from relational DBs (SQL)
+
+Efficiency  
+need to find them quickly  
+vast quantities of data (10's billions pages)  
+thousands queries per second (Google, ~40,000)  
+data constantly changes, need to keep up.
+
+# Image Description
+
+Image 1: The page displays a main heading saying "Two main issues in IR" followed by lists related to information retrieval effectiveness and efficiency. The image shows the number of results and search duration.
+
+```
+-----------------------------------------
+
+---Page Number:-- 28
+```markdown
+# IR main components
+
+## Image Description
+
+Image 1: The image illustrates the main components of an information retrieval system. It shows a 3D character standing next to a large red question mark, representing the Query. A collection of Documents flows into the Search Engine along with the query. Then Relevant Documents emerge from the search engine.
+
+```
+-----------------------------------------
+
+---Page Number:-- 29
+```markdown
+# Documents
+
+Document = the **element** to be **retrieved**  
+* Unstructured nature  
+* Unique ID  
+* N documents --> Collection  
+* web-pages, emails, book, page, sentence, tweets  
+* photos, videos, musical pieces, code  
+* answers to questions  
+* product descriptions, advertisements  
+* people  
+
+# Image Description  
+
+Image 1: The image shows a set of three white papers stacked on top of each other, likely representing documents or files.  
+
+# Questions  
+
+There are no questions on the displayed page.  
+```
+-----------------------------------------
+
